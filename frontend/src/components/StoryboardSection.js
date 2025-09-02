@@ -1,18 +1,24 @@
 import React, { useState } from 'react';
-import { Image as ImageIcon, Wand2, RefreshCw, Send, Download, History, ArrowUp } from 'lucide-react';
+import { Image as ImageIcon, Wand2, RefreshCw, Send, Download, History, ArrowUp, Edit, MessageSquare } from 'lucide-react';
 import { Button } from './ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { Badge } from './ui/badge';
+import { Input } from './ui/input';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from './ui/dialog';
 import { useProject } from '../contexts/ProjectContext';
 import { useToast } from '../hooks/use-toast';
 import { IMAGE_PRESETS, IMAGE_STYLES } from '../mock';
+import VersionHistoryModal from './VersionHistoryModal';
 
 const StoryboardSection = ({ setActiveTab }) => {
   const { currentProject, updateProject } = useProject();
   const { toast } = useToast();
   const [isGenerating, setIsGenerating] = useState(false);
   const [selectedStyle, setSelectedStyle] = useState('realistic');
+  const [modifyingSceneId, setModifyingSceneId] = useState(null);
+  const [modifyPrompt, setModifyPrompt] = useState('');
+  const [historySceneId, setHistorySceneId] = useState(null);
 
   const handleGenerateImages = async () => {
     if (!currentProject.script.generated) {
@@ -32,7 +38,14 @@ const StoryboardSection = ({ setActiveTab }) => {
       content: scene.content,
       image: IMAGE_PRESETS[selectedStyle]?.[scene.id] || IMAGE_PRESETS.realistic[scene.id],
       style: selectedStyle,
-      generated: true
+      generated: true,
+      history: [{
+        id: `${scene.id}_initial`,
+        image: IMAGE_PRESETS[selectedStyle]?.[scene.id] || IMAGE_PRESETS.realistic[scene.id],
+        timestamp: new Date().toISOString(),
+        style: selectedStyle,
+        prompt: null
+      }]
     }));
 
     const updatedProject = {
@@ -63,11 +76,22 @@ const StoryboardSection = ({ setActiveTab }) => {
         const styles = Object.keys(IMAGE_PRESETS);
         const currentIndex = styles.indexOf(scene.style);
         const nextStyle = styles[(currentIndex + 1) % styles.length];
+        const newImage = IMAGE_PRESETS[nextStyle][sceneId];
+        
+        // Add to history
+        const newHistoryEntry = {
+          id: `${sceneId}_${Date.now()}`,
+          image: newImage,
+          timestamp: new Date().toISOString(),
+          style: nextStyle,
+          prompt: null
+        };
         
         return {
           ...scene,
-          image: IMAGE_PRESETS[nextStyle][sceneId],
-          style: nextStyle
+          image: newImage,
+          style: nextStyle,
+          history: [newHistoryEntry, ...(scene.history || [])]
         };
       }
       return scene;
@@ -87,6 +111,101 @@ const StoryboardSection = ({ setActiveTab }) => {
     });
   };
 
+  const handleModifyWithPrompt = async (sceneId) => {
+    if (!modifyPrompt.trim()) {
+      toast({
+        title: "Prompt Required",
+        description: "Please enter a modification prompt.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setIsGenerating(true);
+    await new Promise(resolve => setTimeout(resolve, 2000));
+
+    const scenes = currentProject.storyboard.scenes.map(scene => {
+      if (scene.id === sceneId) {
+        // For demo, use a different preset based on prompt keywords
+        let newStyle = scene.style;
+        if (modifyPrompt.toLowerCase().includes('night') || modifyPrompt.toLowerCase().includes('dark')) {
+          newStyle = 'cinematic';
+        } else if (modifyPrompt.toLowerCase().includes('art') || modifyPrompt.toLowerCase().includes('paint')) {
+          newStyle = 'artistic';
+        } else {
+          // Just cycle to next style
+          const styles = Object.keys(IMAGE_PRESETS);
+          const currentIndex = styles.indexOf(scene.style);
+          newStyle = styles[(currentIndex + 1) % styles.length];
+        }
+        
+        const newImage = IMAGE_PRESETS[newStyle][sceneId];
+        
+        // Add to history
+        const newHistoryEntry = {
+          id: `${sceneId}_${Date.now()}`,
+          image: newImage,
+          timestamp: new Date().toISOString(),
+          style: newStyle,
+          prompt: modifyPrompt
+        };
+        
+        return {
+          ...scene,
+          image: newImage,
+          style: newStyle,
+          history: [newHistoryEntry, ...(scene.history || [])]
+        };
+      }
+      return scene;
+    });
+
+    const updatedProject = {
+      ...currentProject,
+      storyboard: { ...currentProject.storyboard, scenes }
+    };
+
+    updateProject(updatedProject);
+    setIsGenerating(false);
+    setModifyingSceneId(null);
+    setModifyPrompt('');
+
+    toast({
+      title: "Image Modified",
+      description: `Image updated based on prompt: "${modifyPrompt}"`,
+    });
+  };
+
+  const handleRevertToVersion = (sceneId, version) => {
+    const scenes = currentProject.storyboard.scenes.map(scene => {
+      if (scene.id === sceneId) {
+        // Move the reverted version to the front of history
+        const updatedHistory = [version, ...scene.history.filter(h => h.id !== version.id)];
+        
+        return {
+          ...scene,
+          image: version.image,
+          style: version.style,
+          history: updatedHistory
+        };
+      }
+      return scene;
+    });
+
+    const updatedProject = {
+      ...currentProject,
+      storyboard: { ...currentProject.storyboard, scenes }
+    };
+
+    updateProject(updatedProject);
+    setHistorySceneId(null);
+
+    toast({
+      title: "Version Restored",
+      description: "Image has been reverted to the selected version.",
+    });
+  };
+
   const handleSendToAnimation = () => {
     if (!currentProject.storyboard.generated) {
       toast({
@@ -96,6 +215,34 @@ const StoryboardSection = ({ setActiveTab }) => {
       });
       return;
     }
+
+    // Auto-populate animation timeline
+    const animationScenes = currentProject.storyboard.scenes.map(scene => ({
+      id: scene.id,
+      content: scene.content,
+      image: scene.image,
+      keyframes: [{
+        id: `initial_${scene.id}`,
+        type: 'keyframe',
+        timestamp: 0,
+        image: scene.image,
+        history: [{
+          id: `keyframe_initial_${scene.id}`,
+          image: scene.image,
+          timestamp: new Date().toISOString(),
+          style: scene.style,
+          prompt: null
+        }]
+      }],
+      rendered: false
+    }));
+
+    const updatedProject = {
+      ...currentProject,
+      animation: { scenes: animationScenes, rendered: false }
+    };
+
+    updateProject(updatedProject);
 
     toast({
       title: "Sent to Animation",
@@ -108,6 +255,9 @@ const StoryboardSection = ({ setActiveTab }) => {
     return <div className="p-6 text-white">No project selected</div>;
   }
 
+  const hasStoryboard = currentProject.storyboard?.generated;
+  const currentScene = currentProject.storyboard?.scenes?.find(s => s.id === historySceneId);
+
   return (
     <div className="p-6 space-y-6">
       {/* Header */}
@@ -119,7 +269,7 @@ const StoryboardSection = ({ setActiveTab }) => {
         
         <div className="flex items-center space-x-3">
           <Badge variant="outline" className="border-teal-500/30 text-teal-300">
-            {currentProject.storyboard?.generated ? 'Generated' : 'Not Generated'}
+            {hasStoryboard ? 'Generated' : 'Not Generated'}
           </Badge>
           <Button variant="outline" className="border-white/20 text-white hover:bg-white/10">
             <History className="h-4 w-4 mr-2" />
@@ -185,7 +335,7 @@ const StoryboardSection = ({ setActiveTab }) => {
             </CardContent>
           </Card>
 
-          {currentProject.storyboard?.generated && (
+          {hasStoryboard && (
             <Card className="bg-[#161616]/60 backdrop-blur-xl border-white/10">
               <CardHeader>
                 <CardTitle className="text-white text-lg">Storyboard Info</CardTitle>
@@ -212,7 +362,7 @@ const StoryboardSection = ({ setActiveTab }) => {
 
         {/* Storyboard Content */}
         <div className="lg:col-span-3">
-          {currentProject.storyboard?.generated ? (
+          {hasStoryboard ? (
             <div className="space-y-6">
               {currentProject.storyboard.scenes.map((scene, index) => (
                 <Card key={scene.id} className="bg-[#161616]/60 backdrop-blur-xl border-white/10">
@@ -232,6 +382,25 @@ const StoryboardSection = ({ setActiveTab }) => {
                         >
                           <RefreshCw className="h-3 w-3 mr-1" />
                           Regenerate
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => setModifyingSceneId(scene.id)}
+                          disabled={isGenerating}
+                          className="border-blue-500/30 text-blue-300 hover:bg-blue-500/10"
+                        >
+                          <Edit className="h-3 w-3 mr-1" />
+                          Modify
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => setHistorySceneId(scene.id)}
+                          className="border-yellow-500/30 text-yellow-300 hover:bg-yellow-500/10"
+                        >
+                          <History className="h-3 w-3 mr-1" />
+                          History
                         </Button>
                         <Button
                           size="sm"
@@ -267,6 +436,48 @@ const StoryboardSection = ({ setActiveTab }) => {
                         <p className="text-sm text-gray-300 leading-relaxed">{scene.content}</p>
                       </div>
                     </div>
+
+                    {/* Modify Prompt Input */}
+                    {modifyingSceneId === scene.id && (
+                      <div className="mt-4 p-4 bg-white/5 rounded-lg border border-blue-500/30">
+                        <div className="flex items-center space-x-2 mb-2">
+                          <MessageSquare className="h-4 w-4 text-blue-400" />
+                          <span className="text-blue-300 text-sm font-medium">Modify with Prompt</span>
+                        </div>
+                        <div className="flex space-x-2">
+                          <Input
+                            value={modifyPrompt}
+                            onChange={(e) => setModifyPrompt(e.target.value)}
+                            placeholder="e.g., make it night time, remove background..."
+                            className="bg-white/5 border-white/20 text-white placeholder-gray-500 flex-1"
+                            onKeyPress={(e) => {
+                              if (e.key === 'Enter') {
+                                handleModifyWithPrompt(scene.id);
+                              }
+                            }}
+                          />
+                          <Button
+                            size="sm"
+                            onClick={() => handleModifyWithPrompt(scene.id)}
+                            disabled={isGenerating}
+                            className="bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 border border-blue-500/30"
+                          >
+                            Apply
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => {
+                              setModifyingSceneId(null);
+                              setModifyPrompt('');
+                            }}
+                            className="border-white/20 text-white hover:bg-white/10"
+                          >
+                            Cancel
+                          </Button>
+                        </div>
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
               ))}
@@ -299,6 +510,15 @@ const StoryboardSection = ({ setActiveTab }) => {
           )}
         </div>
       </div>
+
+      {/* Version History Modal */}
+      <VersionHistoryModal
+        isOpen={!!historySceneId}
+        onClose={() => setHistorySceneId(null)}
+        history={currentScene?.history || []}
+        onRevert={(version) => handleRevertToVersion(historySceneId, version)}
+        title={`Scene ${currentProject.storyboard?.scenes?.findIndex(s => s.id === historySceneId) + 1 || ''} History`}
+      />
     </div>
   );
 };
