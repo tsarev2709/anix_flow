@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { Wand2, RefreshCw, Send, Download, History, GripVertical, Plus, Trash2 } from 'lucide-react';
+import { Wand2, RefreshCw, Send, Download, History, GripVertical, Plus, Trash2, MessageSquare } from 'lucide-react';
 import { Button } from './ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Textarea } from './ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { Badge } from './ui/badge';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from './ui/alert-dialog';
 import { useProject } from '../contexts/ProjectContext';
 import { useToast } from '../hooks/use-toast';
 import { SCRIPT_PRESETS, NARRATOR_OPTIONS } from '../mock';
@@ -15,6 +16,8 @@ const ScriptSection = ({ setActiveTab }) => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [selectedNarrator, setSelectedNarrator] = useState('friendly');
   const [draggedIndex, setDraggedIndex] = useState(null);
+  const [userPrompt, setUserPrompt] = useState(currentProject?.script?.userPrompt || '');
+  const [deleteSceneIndex, setDeleteSceneIndex] = useState(null);
 
   const handleGenerateScript = async () => {
     setIsGenerating(true);
@@ -27,7 +30,8 @@ const ScriptSection = ({ setActiveTab }) => {
       script: {
         ...SCRIPT_PRESETS.primary,
         generated: true,
-        narrator: selectedNarrator
+        narrator: selectedNarrator,
+        userPrompt: userPrompt
       }
     };
     
@@ -54,7 +58,8 @@ const ScriptSection = ({ setActiveTab }) => {
       script: {
         ...newPreset,
         generated: true,
-        narrator: selectedNarrator
+        narrator: selectedNarrator,
+        userPrompt: userPrompt
       }
     };
     
@@ -118,10 +123,84 @@ const ScriptSection = ({ setActiveTab }) => {
     updateProject(updatedProject);
   };
 
+  const handleUserPromptChange = (newPrompt) => {
+    setUserPrompt(newPrompt);
+    const updatedProject = {
+      ...currentProject,
+      script: { ...currentProject.script, userPrompt: newPrompt }
+    };
+    updateProject(updatedProject);
+  };
+
+  const handleAddScene = () => {
+    const newScene = {
+      id: `scene_${Date.now()}`,
+      content: '',
+      duration: 5
+    };
+    
+    const scenes = [...(currentProject.script.scenes || []), newScene];
+    const updatedProject = {
+      ...currentProject,
+      script: { ...currentProject.script, scenes }
+    };
+    
+    updateProject(updatedProject);
+    toast({
+      title: "Scene Added",
+      description: "New scene has been added to your script.",
+    });
+  };
+
+  const handleDeleteScene = (sceneIndex) => {
+    const scenes = [...currentProject.script.scenes];
+    scenes.splice(sceneIndex, 1);
+    
+    const updatedProject = {
+      ...currentProject,
+      script: { ...currentProject.script, scenes }
+    };
+    
+    updateProject(updatedProject);
+    setDeleteSceneIndex(null);
+    
+    toast({
+      title: "Scene Deleted",
+      description: "Scene has been removed from your script.",
+    });
+  };
+
   const handleSendToStoryboard = () => {
+    // Auto-populate storyboard when sending
+    const storyboardScenes = currentProject.script.scenes.map(scene => ({
+      id: scene.id,
+      content: scene.content,
+      image: `https://picsum.photos/seed/${scene.id}-realistic/800/450`,
+      style: 'realistic',
+      generated: true,
+      history: [{
+        id: `${scene.id}_initial`,
+        image: `https://picsum.photos/seed/${scene.id}-realistic/800/450`,
+        timestamp: new Date().toISOString(),
+        style: 'realistic',
+        prompt: null
+      }]
+    }));
+
+    const updatedProject = {
+      ...currentProject,
+      storyboard: {
+        scenes: storyboardScenes,
+        style: 'realistic',
+        generated: true
+      }
+    };
+
+    updateProject(updatedProject);
+    
     toast({
       title: "Sent to Storyboard",
-      description: "Script has been sent to the storyboard section!",
+      description: "Script has been sent and storyboard images auto-generated!",
     });
     setActiveTab('storyboard');
   };
@@ -201,6 +280,26 @@ const ScriptSection = ({ setActiveTab }) => {
           <Card className="bg-[#161616]/60 backdrop-blur-xl border-white/10">
             <CardHeader>
               <CardTitle className="text-white flex items-center">
+                <MessageSquare className="h-5 w-5 mr-2 text-teal-400" />
+                Story Input
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <label className="text-sm text-gray-300 mb-2 block">Describe your animation story...</label>
+                <Textarea
+                  value={userPrompt}
+                  onChange={(e) => handleUserPromptChange(e.target.value)}
+                  className="bg-white/5 border-white/20 text-white placeholder-gray-500 resize-none focus:border-teal-400/50 focus:ring-teal-400/20 min-h-[80px]"
+                  placeholder="A curious robot discovers friendship with a cat in a dusty laboratory..."
+                />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-[#161616]/60 backdrop-blur-xl border-white/10">
+            <CardHeader>
+              <CardTitle className="text-white flex items-center">
                 <Wand2 className="h-5 w-5 mr-2 text-teal-400" />
                 AI Generation
               </CardTitle>
@@ -266,7 +365,7 @@ const ScriptSection = ({ setActiveTab }) => {
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between">
                     <span className="text-gray-400">Scenes:</span>
-                    <span className="text-white">{currentProject.script.scenes.length}</span>
+                    <span className="text-white">{currentProject.script.scenes?.length || 0}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-400">Narrator:</span>
@@ -275,7 +374,7 @@ const ScriptSection = ({ setActiveTab }) => {
                   <div className="flex justify-between">
                     <span className="text-gray-400">Total Duration:</span>
                     <span className="text-white">
-                      {currentProject.script.scenes.reduce((sum, scene) => sum + scene.duration, 0)}s
+                      {currentProject.script.scenes?.reduce((sum, scene) => sum + scene.duration, 0) || 0}s
                     </span>
                   </div>
                 </div>
@@ -288,7 +387,7 @@ const ScriptSection = ({ setActiveTab }) => {
         <div className="lg:col-span-2">
           {currentProject.script.generated ? (
             <div className="space-y-4">
-              {currentProject.script.scenes.map((scene, index) => (
+              {currentProject.script.scenes?.map((scene, index) => (
                 <Card 
                   key={scene.id}
                   className="bg-[#161616]/60 backdrop-blur-xl border-white/10 hover:border-white/20 transition-all duration-200"
@@ -318,6 +417,14 @@ const ScriptSection = ({ setActiveTab }) => {
                           <RefreshCw className="h-3 w-3 mr-1" />
                           Regenerate
                         </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => setDeleteSceneIndex(index)}
+                          className="border-red-500/30 text-red-400 hover:bg-red-500/10"
+                        >
+                          <Trash2 className="h-3 w-3" />
+                        </Button>
                       </div>
                     </div>
                   </CardHeader>
@@ -331,6 +438,20 @@ const ScriptSection = ({ setActiveTab }) => {
                   </CardContent>
                 </Card>
               ))}
+              
+              {/* Add New Scene Button */}
+              <Card className="bg-[#161616]/40 backdrop-blur-xl border-white/10 border-dashed hover:border-white/20 transition-colors">
+                <CardContent className="p-6">
+                  <Button 
+                    onClick={handleAddScene}
+                    variant="outline"
+                    className="w-full border-white/20 text-white hover:bg-white/10"
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add New Scene
+                  </Button>
+                </CardContent>
+              </Card>
               
               {/* Send to Storyboard */}
               <Card className="bg-gradient-to-r from-teal-500/10 to-purple-500/10 border-teal-400/30 backdrop-blur-xl">
@@ -354,12 +475,35 @@ const ScriptSection = ({ setActiveTab }) => {
               <div className="text-center">
                 <Wand2 className="h-12 w-12 text-gray-500 mx-auto mb-4" />
                 <h3 className="text-lg font-semibold text-white mb-2">No Script Generated</h3>
-                <p className="text-gray-400 mb-4">Click "Generate Script" to create your animation script</p>
+                <p className="text-gray-400 mb-4">Add your story description and click "Generate Script" to create your animation script</p>
               </div>
             </Card>
           )}
         </div>
       </div>
+
+      {/* Delete Scene Confirmation Dialog */}
+      <AlertDialog open={deleteSceneIndex !== null} onOpenChange={() => setDeleteSceneIndex(null)}>
+        <AlertDialogContent className="bg-[#161616] border-white/20">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-white">Delete Scene</AlertDialogTitle>
+            <AlertDialogDescription className="text-gray-400">
+              Are you sure you want to delete Scene {deleteSceneIndex !== null ? deleteSceneIndex + 1 : ''}? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="bg-white/5 border-white/20 text-white hover:bg-white/10">
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={() => handleDeleteScene(deleteSceneIndex)}
+              className="bg-red-500 hover:bg-red-600 text-white"
+            >
+              Delete Scene
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
