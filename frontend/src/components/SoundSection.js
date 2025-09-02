@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { Volume2, Mic, Music, Zap, Play, Pause, Download, Send } from 'lucide-react';
+import { Volume2, Mic, Music, Zap, Play, Pause, Download, Send, MessageSquare, GripHorizontal } from 'lucide-react';
 import { Button } from './ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { Slider } from './ui/slider';
 import { Badge } from './ui/badge';
+import { Input } from './ui/input';
 import { useProject } from '../contexts/ProjectContext';
 import { useToast } from '../hooks/use-toast';
 import { AUDIO_PRESETS, VOICE_CHARACTERS, MUSIC_GENRES } from '../mock';
@@ -18,6 +19,9 @@ const SoundSection = () => {
   const [voiceVolume, setVoiceVolume] = useState([80]);
   const [musicVolume, setMusicVolume] = useState([60]);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [voicePrompt, setVoicePrompt] = useState('');
+  const [musicPrompt, setMusicPrompt] = useState('');
+  const [draggedClip, setDraggedClip] = useState(null);
 
   const handleGenerateVoiceover = async () => {
     if (!currentProject.script?.generated) {
@@ -40,7 +44,9 @@ const SoundSection = () => {
       audioUrl: AUDIO_PRESETS.voiceover[selectedVoice],
       duration: scene.duration,
       volume: voiceVolume[0],
-      character: selectedVoice
+      character: selectedVoice,
+      startTime: index * scene.duration, // Auto-position based on scene timing
+      prompt: voicePrompt || null
     }));
 
     const updatedProject = {
@@ -53,6 +59,7 @@ const SoundSection = () => {
 
     updateProject(updatedProject);
     setIsGenerating(false);
+    setVoicePrompt('');
 
     toast({
       title: "Voiceover Generated",
@@ -71,7 +78,9 @@ const SoundSection = () => {
       audioUrl: AUDIO_PRESETS.music[selectedGenre],
       duration: currentProject.script?.scenes?.reduce((sum, scene) => sum + scene.duration, 0) || 30,
       volume: musicVolume[0],
-      genre: selectedGenre
+      genre: selectedGenre,
+      startTime: 0, // Start from beginning
+      prompt: musicPrompt || null
     };
 
     const updatedProject = {
@@ -84,6 +93,7 @@ const SoundSection = () => {
 
     updateProject(updatedProject);
     setIsGenerating(false);
+    setMusicPrompt('');
 
     toast({
       title: "Music Generated",
@@ -115,6 +125,54 @@ const SoundSection = () => {
     // In a real app, this would control video playback
   };
 
+  const handleDragStart = (e, clip) => {
+    setDraggedClip(clip);
+    e.dataTransfer.effectAllowed = 'move';
+  };
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+  };
+
+  const handleDrop = (e, trackType) => {
+    e.preventDefault();
+    
+    if (!draggedClip) return;
+
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const trackWidth = rect.width;
+    const totalDuration = currentProject.script?.scenes?.reduce((sum, scene) => sum + scene.duration, 0) || 30;
+    const newStartTime = Math.max(0, (x / trackWidth) * totalDuration);
+
+    const updatedProject = { ...currentProject };
+    
+    if (trackType === 'voiceover' && draggedClip.type === 'voiceover') {
+      updatedProject.sound.voiceover = updatedProject.sound.voiceover.map(track => 
+        track.id === draggedClip.id ? { ...track, startTime: newStartTime } : track
+      );
+    } else if (trackType === 'music' && draggedClip.type === 'music') {
+      updatedProject.sound.music = updatedProject.sound.music.map(track => 
+        track.id === draggedClip.id ? { ...track, startTime: newStartTime } : track
+      );
+    }
+
+    updateProject(updatedProject);
+    setDraggedClip(null);
+
+    toast({
+      title: "Audio Clip Moved",
+      description: `${draggedClip.name} repositioned to ${Math.round(newStartTime)}s`,
+    });
+  };
+
+  const calculateClipPosition = (startTime, duration, totalDuration) => {
+    const left = (startTime / totalDuration) * 100;
+    const width = Math.min((duration / totalDuration) * 100, 100 - left);
+    return { left: `${left}%`, width: `${width}%` };
+  };
+
   if (!currentProject) {
     return <div className="p-6 text-white">No project selected</div>;
   }
@@ -122,6 +180,7 @@ const SoundSection = () => {
   const hasAnimation = currentProject.animation?.rendered;
   const hasVoiceover = currentProject.sound?.voiceover?.length > 0;
   const hasMusic = currentProject.sound?.music?.length > 0;
+  const totalDuration = currentProject.script?.scenes?.reduce((sum, scene) => sum + scene.duration, 0) || 30;
 
   return (
     <div className="p-6 space-y-6">
@@ -215,17 +274,31 @@ const SoundSection = () => {
                     <span className="text-xs text-gray-400 w-8">{voiceVolume[0]}%</span>
                   </div>
                 </div>
-                <div className="h-12 bg-white/5 rounded border border-white/10 flex items-center px-3">
+                <div 
+                  className="relative h-12 bg-white/5 rounded border border-white/10 overflow-hidden"
+                  onDragOver={handleDragOver}
+                  onDrop={(e) => handleDrop(e, 'voiceover')}
+                >
                   {hasVoiceover ? (
-                    <div className="flex space-x-1 overflow-x-auto">
-                      {currentProject.sound.voiceover.map((track, index) => (
-                        <div key={track.id} className="flex-shrink-0 h-8 bg-blue-500/30 rounded border border-blue-400/50 px-3 flex items-center">
-                          <span className="text-xs text-blue-300">VO {index + 1}</span>
+                    currentProject.sound.voiceover.map((track, index) => {
+                      const position = calculateClipPosition(track.startTime, track.duration, totalDuration);
+                      return (
+                        <div
+                          key={track.id}
+                          className="absolute h-8 bg-blue-500/30 rounded border border-blue-400/50 flex items-center justify-center cursor-move top-2 group hover:bg-blue-500/40 transition-colors"
+                          style={position}
+                          draggable
+                          onDragStart={(e) => handleDragStart(e, track)}
+                        >
+                          <GripHorizontal className="h-3 w-3 text-blue-300 opacity-0 group-hover:opacity-100 transition-opacity mr-1" />
+                          <span className="text-xs text-blue-300 truncate">VO {index + 1}</span>
                         </div>
-                      ))}
-                    </div>
+                      );
+                    })
                   ) : (
-                    <span className="text-gray-500 text-xs">No voiceover tracks</span>
+                    <div className="flex items-center justify-center h-full">
+                      <span className="text-gray-500 text-xs">No voiceover tracks - drop here to position</span>
+                    </div>
                   )}
                 </div>
               </div>
@@ -249,13 +322,31 @@ const SoundSection = () => {
                     <span className="text-xs text-gray-400 w-8">{musicVolume[0]}%</span>
                   </div>
                 </div>
-                <div className="h-12 bg-white/5 rounded border border-white/10 flex items-center px-3">
+                <div 
+                  className="relative h-12 bg-white/5 rounded border border-white/10 overflow-hidden"
+                  onDragOver={handleDragOver}
+                  onDrop={(e) => handleDrop(e, 'music')}
+                >
                   {hasMusic ? (
-                    <div className="flex-1 h-8 bg-green-500/30 rounded border border-green-400/50 px-3 flex items-center">
-                      <span className="text-xs text-green-300">{currentProject.sound.music[0].name}</span>
-                    </div>
+                    currentProject.sound.music.map((track) => {
+                      const position = calculateClipPosition(track.startTime, track.duration, totalDuration);
+                      return (
+                        <div
+                          key={track.id}
+                          className="absolute h-8 bg-green-500/30 rounded border border-green-400/50 flex items-center justify-center cursor-move top-2 group hover:bg-green-500/40 transition-colors"
+                          style={position}
+                          draggable
+                          onDragStart={(e) => handleDragStart(e, track)}
+                        >
+                          <GripHorizontal className="h-3 w-3 text-green-300 opacity-0 group-hover:opacity-100 transition-opacity mr-1" />
+                          <span className="text-xs text-green-300 truncate">{track.genre}</span>
+                        </div>
+                      );
+                    })
                   ) : (
-                    <span className="text-gray-500 text-xs">No music tracks</span>
+                    <div className="flex items-center justify-center h-full">
+                      <span className="text-gray-500 text-xs">No music tracks - drop here to position</span>
+                    </div>
                   )}
                 </div>
               </div>
@@ -266,8 +357,20 @@ const SoundSection = () => {
                   <Zap className="h-4 w-4 text-yellow-400" />
                   <span className="text-white text-sm">Sound Effects</span>
                 </div>
-                <div className="h-12 bg-white/5 rounded border border-white/10 flex items-center px-3">
-                  <span className="text-gray-500 text-xs">No sound effects</span>
+                <div className="h-12 bg-white/5 rounded border border-white/10 flex items-center justify-center">
+                  <span className="text-gray-500 text-xs">No sound effects - coming soon</span>
+                </div>
+              </div>
+
+              {/* Timeline Ruler */}
+              <div className="relative h-6 bg-white/5 rounded border border-white/10 mt-4">
+                <div className="absolute inset-0 flex items-center justify-between px-2">
+                  {Array.from({ length: Math.ceil(totalDuration / 5) + 1 }, (_, i) => (
+                    <div key={i} className="flex flex-col items-center">
+                      <div className="h-1 w-px bg-gray-400"></div>
+                      <span className="text-xs text-gray-400 mt-1">{i * 5}s</span>
+                    </div>
+                  ))}
                 </div>
               </div>
             </CardContent>
@@ -301,6 +404,19 @@ const SoundSection = () => {
                 </Select>
               </div>
 
+              <div>
+                <label className="text-sm text-gray-300 mb-2 block flex items-center">
+                  <MessageSquare className="h-3 w-3 mr-1" />
+                  Voice Generation Prompt
+                </label>
+                <Input
+                  value={voicePrompt}
+                  onChange={(e) => setVoicePrompt(e.target.value)}
+                  placeholder="e.g., energetic and friendly tone..."
+                  className="bg-white/5 border-white/20 text-white placeholder-gray-500"
+                />
+              </div>
+
               <Button 
                 onClick={handleGenerateVoiceover}
                 disabled={isGenerating || !currentProject.script?.generated}
@@ -313,6 +429,8 @@ const SoundSection = () => {
               {hasVoiceover && (
                 <div className="text-xs text-green-400 bg-green-500/10 p-2 rounded border border-green-500/20">
                   ✓ {currentProject.sound.voiceover.length} voiceover tracks generated
+                  <br />
+                  <span className="text-gray-400">Drag clips in timeline to reposition</span>
                 </div>
               )}
             </CardContent>
@@ -343,6 +461,19 @@ const SoundSection = () => {
                 </Select>
               </div>
 
+              <div>
+                <label className="text-sm text-gray-300 mb-2 block flex items-center">
+                  <MessageSquare className="h-3 w-3 mr-1" />
+                  Music Generation Prompt
+                </label>
+                <Input
+                  value={musicPrompt}
+                  onChange={(e) => setMusicPrompt(e.target.value)}
+                  placeholder="e.g., epic orchestral, upbeat synthwave..."
+                  className="bg-white/5 border-white/20 text-white placeholder-gray-500"
+                />
+              </div>
+
               <Button 
                 onClick={handleGenerateMusic}
                 disabled={isGenerating}
@@ -355,6 +486,8 @@ const SoundSection = () => {
               {hasMusic && (
                 <div className="text-xs text-green-400 bg-green-500/10 p-2 rounded border border-green-500/20">
                   ✓ Background music generated
+                  <br />
+                  <span className="text-gray-400">Drag clips in timeline to reposition</span>
                 </div>
               )}
             </CardContent>
