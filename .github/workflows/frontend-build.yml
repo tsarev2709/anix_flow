@@ -13,6 +13,10 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
+    if: ${{ hashFiles('frontend/package.json') != '' }}
+    defaults:
+      run:
+        working-directory: ./frontend
     steps:
       - uses: actions/checkout@v4
       - name: Setup Node.js
@@ -20,10 +24,13 @@ jobs:
         with:
           node-version: 20
       - name: Install dependencies
-        working-directory: frontend
-        run: npm ci || npm install
+        run: |
+          if [ -f package-lock.json ]; then
+            npm ci
+          else
+            npm install
+          fi
       - name: Build frontend
-        working-directory: frontend
         run: npm run build
       - name: Deploy to gh-pages
         uses: peaceiris/actions-gh-pages@v3
