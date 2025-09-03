@@ -15,9 +15,6 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./frontend
     steps:
       - uses: actions/checkout@v4
       - name: Setup Node.js
@@ -27,15 +24,26 @@ jobs:
           node-version: 20
       - name: Install dependencies
         if: ${{ hashFiles('frontend/package.json') != '' }}
+        working-directory: frontend
         run: |
-          if [ -f package-lock.json ]; then
-            npm ci
+          if [ -f package.json ]; then
+            if [ -f package-lock.json ]; then
+              npm ci
+            else
+              npm install
+            fi
           else
-            npm install
+            echo "No package.json found, skipping install"
           fi
       - name: Build frontend
         if: ${{ hashFiles('frontend/package.json') != '' }}
-        run: npm run build
+        working-directory: frontend
+        run: |
+          if [ -f package.json ]; then
+            npm run build
+          else
+            echo "No package.json found, skipping build"
+          fi
       - name: Upload artifact
         if: ${{ hashFiles('frontend/package.json') != '' }}
         uses: actions/upload-pages-artifact@v1
