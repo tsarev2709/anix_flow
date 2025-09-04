@@ -46,7 +46,7 @@ jobs:
           fi
       - name: Upload artifact
         if: ${{ hashFiles('frontend/package.json') != '' }}
-        uses: actions/upload-pages-artifact@v2
+        uses: actions/upload-pages-artifact@v3
         with:
           path: frontend/build
 
