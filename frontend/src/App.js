@@ -60,7 +60,7 @@ const AppContent = () => {
 function App() {
   return (
     <div className="App">
-      <BrowserRouter>
+      <BrowserRouter basename="/anix_flow">
         <AuthProvider>
           <AppContent />
           <Toaster />
