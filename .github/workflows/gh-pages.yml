@@ -1,0 +1,64 @@
+name: Build and Deploy Frontend
+
+on:
+  push:
+    branches:
+      - main
+      - work
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node.js
+        if: ${{ hashFiles('frontend/package.json') != '' }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Install dependencies
+        if: ${{ hashFiles('frontend/package.json') != '' }}
+        working-directory: frontend
+        run: |
+          if [ -f package.json ]; then
+            if [ -f package-lock.json ]; then
+              npm ci
+            else
+              npm install
+            fi
+          else
+            echo "No package.json found, skipping install"
+          fi
+      - name: Build frontend
+        if: ${{ hashFiles('frontend/package.json') != '' }}
+        working-directory: frontend
+        run: |
+          if [ -f package.json ]; then
+            npm run build
+          else
+            echo "No package.json found, skipping build"
+          fi
+      - name: Upload artifact
+        if: ${{ hashFiles('frontend/package.json') != '' }}
+        uses: actions/upload-pages-artifact@v2
+        with:
+          path: frontend/build
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        if: ${{ hashFiles('frontend/package.json') != '' }}
+        id: deployment
+        uses: actions/deploy-pages@v4
+
