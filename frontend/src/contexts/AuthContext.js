@@ -25,7 +25,7 @@ export const AuthProvider = ({ children }) => {
 
   const login = (username, password) => {
     // Demo login - only admin/admin works
-    if (username === 'admin' && password === 'admin') {
+    if (username === 'admin111' && password === 'admin') {
       sessionStorage.setItem('animai_token', 'authenticated');
       setIsAuthenticated(true);
       return { success: true };
