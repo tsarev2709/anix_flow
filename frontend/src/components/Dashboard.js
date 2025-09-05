@@ -295,7 +295,7 @@ const Dashboard = ({ setActiveTab }) => {
       <AlertDialog open={!!deleteProjectId} onOpenChange={() => setDeleteProjectId(null)}>
         <AlertDialogContent className="bg-[#161616] border-white/20">
           <AlertDialogHeader>
-            <AlertDialogTitle className="text-white">Delete Project</AlertDialogTitle>
+            <AlertDialogTitle className="text-white">Расщепление вселенной</AlertDialogTitle>
             <AlertDialogDescription className="text-gray-400">
               Подтвердите аннигиляцию реальности. Действие необратимо. Вселенные не воскрешают.
             </AlertDialogDescription>
