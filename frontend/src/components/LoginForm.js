@@ -56,7 +56,7 @@ const LoginForm = () => {
           
           <CardTitle className="text-white text-xl">С возвращением, творец!</CardTitle>
           <CardDescription className="text-gray-400">
-            Твоя вселенная анимации ждёт.
+            Мир твоих снов ждёт.
           </CardDescription>
           
           <div className="text-xs text-gray-500 bg-white/5 p-2 rounded border border-white/10">

@@ -113,15 +113,15 @@ const Dashboard = ({ setActiveTab }) => {
           <CardHeader>
             <div className="flex items-center justify-between">
               <div>
-                <CardTitle className="text-2xl text-white mb-2">Welcome back, Admin</CardTitle>
-                <p className="text-gray-400">Ready to create some amazing animations?</p>
+                <CardTitle className="text-2xl text-white mb-2">Салют, Демиург</CardTitle>
+                <p className="text-gray-400">Создадим новую реальность с нуля?</p>
               </div>
               <Button 
                 onClick={handleCreateProject}
                 className="bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700 text-white border-0 transition-all duration-200 transform hover:scale-105"
               >
                 <Plus className="h-4 w-4 mr-2" />
-                New Project
+                Создать новую вселенную
               </Button>
             </div>
           </CardHeader>
@@ -134,7 +134,7 @@ const Dashboard = ({ setActiveTab }) => {
                   </div>
                   <div>
                     <p className="text-2xl font-bold text-white">{projects.length}</p>
-                    <p className="text-sm text-gray-400">Total Projects</p>
+                    <p className="text-sm text-gray-400">Вселенных в мультивселенной</p>
                   </div>
                 </div>
               </div>
@@ -148,7 +148,7 @@ const Dashboard = ({ setActiveTab }) => {
                     <p className="text-2xl font-bold text-white">
                       {projects.filter(p => p.status === 'In Progress').length}
                     </p>
-                    <p className="text-sm text-gray-400">In Progress</p>
+                    <p className="text-sm text-gray-400">Идёт большой взрыв</p>
                   </div>
                 </div>
               </div>
@@ -162,7 +162,7 @@ const Dashboard = ({ setActiveTab }) => {
                     <p className="text-2xl font-bold text-white">
                       {projects.filter(p => p.status === 'Completed').length}
                     </p>
-                    <p className="text-sm text-gray-400">Completed</p>
+                    <p className="text-sm text-gray-400">Реальности стабилизированы</p>
                   </div>
                 </div>
               </div>
@@ -174,7 +174,7 @@ const Dashboard = ({ setActiveTab }) => {
       {/* Projects Grid */}
       <div>
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-semibold text-white">Your Projects</h2>
+          <h2 className="text-xl font-semibold text-white">Галерея миров</h2>
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -239,7 +239,7 @@ const Dashboard = ({ setActiveTab }) => {
                       </div>
                     )}
                     <p className="text-sm text-gray-400 mt-1">
-                      Last modified: {formatDate(project.lastModified)}
+                      Хронос тронут: {formatDate(project.lastModified)}
                     </p>
                   </div>
                   
@@ -250,7 +250,7 @@ const Dashboard = ({ setActiveTab }) => {
                       className="bg-teal-500/20 hover:bg-teal-500/30 text-teal-300 border border-teal-500/30 hover:border-teal-500/50"
                     >
                       <Play className="h-3 w-3 mr-1" />
-                      Open
+                      Войти в реальность
                     </Button>
                     
                     <DropdownMenu>
@@ -265,21 +265,21 @@ const Dashboard = ({ setActiveTab }) => {
                           className="text-white hover:bg-white/10 focus:bg-white/10"
                         >
                           <Edit3 className="h-4 w-4 mr-2" />
-                          Rename
+                          Переименовать вселенную
                         </DropdownMenuItem>
                         <DropdownMenuItem 
                           onClick={() => handleDuplicateProject(project.id)}
                           className="text-white hover:bg-white/10 focus:bg-white/10"
                         >
                           <Copy className="h-4 w-4 mr-2" />
-                          Duplicate
+                          Клонировать реальность
                         </DropdownMenuItem>
                         <DropdownMenuItem 
                           onClick={() => setDeleteProjectId(project.id)}
                           className="text-red-400 hover:bg-red-500/10 focus:bg-red-500/10"
                         >
                           <Trash2 className="h-4 w-4 mr-2" />
-                          Delete
+                          Удалить из мультивселенной
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
@@ -297,18 +297,18 @@ const Dashboard = ({ setActiveTab }) => {
           <AlertDialogHeader>
             <AlertDialogTitle className="text-white">Delete Project</AlertDialogTitle>
             <AlertDialogDescription className="text-gray-400">
-              Are you sure you want to delete this project? This action cannot be undone.
+              Подтвердите аннигиляцию реальности. Действие необратимо. Вселенные не воскрешают.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel className="bg-white/5 border-white/20 text-white hover:bg-white/10">
-              Cancel
+              Отменить апокалипсис
             </AlertDialogCancel>
             <AlertDialogAction 
               onClick={() => handleDeleteProject(deleteProjectId)}
               className="bg-red-500 hover:bg-red-600 text-white"
             >
-              Delete
+              Стереть в ничто
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
