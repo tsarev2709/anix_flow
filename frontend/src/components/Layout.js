@@ -92,7 +92,9 @@ const Layout = ({ children, activeTab, setActiveTab }) => {
         {/* Header */}
         <header className="h-16 bg-[#161616]/80 backdrop-blur-xl border-b border-white/10 flex items-center justify-between px-6">
           <div className="flex items-center space-x-4">
-            <h2 className="text-lg font-semibold capitalize">{activeTab}</h2>
+            <h2 className="text-lg font-semibold capitalize">
+              {tabs.find(tab => tab.id === activeTab)?.label || activeTab}
+            </h2>
             {activeTab !== 'dashboard' && (
               <div className="text-gray-500">•</div>
             )}
