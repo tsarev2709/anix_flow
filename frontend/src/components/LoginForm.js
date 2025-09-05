@@ -74,7 +74,7 @@ const LoginForm = () => {
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 className="bg-white/5 border-white/20 text-white placeholder-gray-500 focus:border-teal-400/50 focus:ring-teal-400/20"
-                placeholder="Введите имя пользователя"
+                placeholder="Твой творческий идентификатор"
                 required
               />
             </div>
@@ -87,7 +87,7 @@ const LoginForm = () => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="bg-white/5 border-white/20 text-white placeholder-gray-500 focus:border-teal-400/50 focus:ring-teal-400/20"
-                placeholder="Введите пароль"
+                placeholder="Секретный ключ доступа"
                 required
               />
             </div>

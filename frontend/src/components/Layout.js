@@ -37,9 +37,9 @@ const Layout = ({ children, activeTab, setActiveTab }) => {
             </div>
             <div>
               <h1 className="text-xl font-bold bg-gradient-to-r from-teal-400 to-purple-400 bg-clip-text text-transparent">
-                AnimAI Pro
+                Anix Flow
               </h1>
-              <p className="text-xs text-gray-400">Animation Studio</p>
+              <p className="text-xs text-gray-400">Мир твоих снов</p>
             </div>
           </div>
         </div>
@@ -74,7 +74,7 @@ const Layout = ({ children, activeTab, setActiveTab }) => {
             className="w-full justify-start text-gray-400 hover:text-white hover:bg-white/5"
           >
             <Settings className="h-5 w-5 mr-3" />
-            Settings
+            Настройки
           </Button>
           <Button
             variant="ghost"
@@ -82,7 +82,7 @@ const Layout = ({ children, activeTab, setActiveTab }) => {
             className="w-full justify-start text-gray-400 hover:text-white hover:bg-white/5"
           >
             <LogOut className="h-5 w-5 mr-3" />
-            Logout
+            Пойти трогать траву
           </Button>
         </div>
       </div>
