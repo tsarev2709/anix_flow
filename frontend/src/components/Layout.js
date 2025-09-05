@@ -10,11 +10,11 @@ const Layout = ({ children, activeTab, setActiveTab }) => {
   const { projects, currentProject, setCurrentProject } = useProject();
 
   const tabs = [
-    { id: 'dashboard', label: 'Dashboard', icon: Home },
-    { id: 'script', label: 'Script', icon: FileText },
-    { id: 'storyboard', label: 'Storyboard', icon: Image },
-    { id: 'animation', label: 'Animation', icon: Play },
-    { id: 'sound', label: 'Sound', icon: Volume2 }
+    { id: 'dashboard', label: 'Мои проекты', icon: Home },
+    { id: 'script', label: 'Сценарий', icon: FileText },
+    { id: 'storyboard', label: 'Раскадровка', icon: Image },
+    { id: 'animation', label: 'Анимация', icon: Play },
+    { id: 'sound', label: 'Звук', icon: Volume2 }
   ];
 
   const handleProjectChange = (projectId) => {
@@ -118,9 +118,9 @@ const Layout = ({ children, activeTab, setActiveTab }) => {
             {/* User Area */}
             <div className="flex items-center space-x-2 text-gray-400">
               <div className="h-8 w-8 bg-gradient-to-br from-teal-400 to-purple-400 rounded-full flex items-center justify-center text-white text-sm font-medium">
-                A
+                Д
               </div>
-              <span className="text-sm">Admin</span>
+              <span className="text-sm">Демиург</span>
             </div>
           </div>
         </header>
