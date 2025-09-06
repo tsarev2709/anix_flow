@@ -107,29 +107,29 @@ export const AUDIO_PRESETS = {
 };
 
 export const NARRATOR_OPTIONS = [
-  { value: "friendly", label: "Friendly AI Narrator" },
-  { value: "dramatic", label: "Dramatic Storyteller" },
-  { value: "professional", label: "Professional Narrator" },
-  { value: "robotic", label: "Robotic Voice" }
+  { value: "friendly", label: "Душевный ИИ-наставник" },
+  { value: "dramatic", label: "Мастер драматичных историй" },
+  { value: "professional", label: "Эпичный голос за кадром" },
+  { value: "robotic", label: "Кибернетический тембр" }
 ];
 
 export const IMAGE_STYLES = [
-  { value: "realistic", label: "Photorealistic" },
-  { value: "cinematic", label: "Cinematic" },
-  { value: "artistic", label: "Artistic Style" },
-  { value: "anime", label: "Anime Style" }
+  { value: "realistic", label: "Киношный реализм" },
+  { value: "cinematic", label: "Лента блокбастера" },
+  { value: "artistic", label: "Живая акварель" },
+  { value: "anime", label: "Манга-вдохновение" }
 ];
 
 export const VOICE_CHARACTERS = [
-  { value: "friendly", label: "Friendly AI" },
-  { value: "dramatic", label: "Dramatic Voice" },
-  { value: "robotic", label: "Robotic Tone" }
+  { value: "friendly", label: "ИИ-компаньон" },
+  { value: "dramatic", label: "Голос для эпопеи" },
+  { value: "robotic", label: "Цифровой дискурс" }
 ];
 
 export const MUSIC_GENRES = [
-  { value: "ambient", label: "Ambient" },
-  { value: "electronic", label: "Electronic" },
-  { value: "cinematic", label: "Cinematic" }
+  { value: "ambient", label: "Атмосферные волны" },
+  { value: "electronic", label: "Синти-биты" },
+  { value: "cinematic", label: "Оркестровая мощь" }
 ];
 
 export const SAMPLE_PROJECTS = [
@@ -149,7 +149,7 @@ export const SAMPLE_PROJECTS = [
   },
   {
     id: "project3",
-    name: "Дагестан",
+    name: "Кавказ",
     lastModified: "2024-01-12T09:15:00Z", 
     status: "Draft",
     thumbnail: "https://images.unsplash.com/photo-1505852679233-d9fd70aff56d?w=800&h=450&fit=crop"
