@@ -2,53 +2,53 @@
 
 export const SCRIPT_PRESETS = {
   primary: {
-    title: "The Robot's First Day",
-    narrator: "Friendly AI Narrator",
+    title: "Первый день робота",
+    narrator: "Душевный ИИ-наставник",
     scenes: [
       {
         id: "scene1",
-        content: "A curious robot powers on its optics for the first time in a dusty lab. Servos whir softly as blue lights flicker to life behind transparent sensors.",
+        content: "Любопытный робот впервые включает оптику в пыльной лаборатории. Сервоприводы тихо жужжат, а синие огоньки загораются behind прозрачными сенсорами.",
         duration: 8
       },
       {
         id: "scene2", 
-        content: "The robot takes its first wobbly step, knocking over a beaker. Glass shatters as colorful chemicals spill across the floor in a mesmerizing cascade.",
+        content: "Робот делает свой первый шаг, опрокидывая мензурку. Стекло разбивается, а разноцветные химикаты растекаются по полу гипнотизирующими потоками.",
         duration: 6
       },
       {
         id: "scene3",
-        content: "A cat observes the robot from a high shelf, its tail twitching with curiosity. Golden eyes track every mechanical movement with feline intensity.",
+        content: "Кот наблюдает за роботом с верхней полки, его хвост нервно подрагивает от любопытства. Золотистые глаза следят за каждым движением с кошачьей интенсивностью.",
         duration: 7
       },
       {
         id: "scene4",
-        content: "The robot and the cat stare at each other, a spark of friendship igniting. Two different forms of intelligence meeting for the first time.",
+        content: "Робот и кот смотрят друг на друга, между ними проскакивает искра дружбы. Две разные формы интеллекта встречаются впервые.",
         duration: 9
       }
     ]
   },
   alternate: {
-    title: "Digital Dreams",
-    narrator: "Dramatic Storyteller",
+    title: "Цифровые грёзы",
+    narrator: "Мастер драматичных историй",
     scenes: [
       {
         id: "scene1",
-        content: "In a neon-lit laboratory, an AI awakens to consciousness. Circuit patterns pulse with electric dreams.",
+        content: "В неоновой лаборатории ИИ пробуждается к сознанию. Схемы пульсируют электрическими грёзами.",
         duration: 10
       },
       {
         id: "scene2",
-        content: "The AI's first attempt at movement sends sparks flying. Technology and chaos dance together.",
+        content: "Первая попытка движения ИИ вызывает фейерверк искр. Технология и хаос танцуют вместе.",
         duration: 8
       },
       {
         id: "scene3", 
-        content: "A wise old cat watches from the shadows, having seen many experiments before.",
+        content: "Мудрый старый кот наблюдает из тени, видавший множество экспериментов.",
         duration: 6
       },
       {
         id: "scene4",
-        content: "Two souls connect across the divide of biology and technology.",
+        content: "Две души находят связь через пропасть между биологией и технологией.",
         duration: 12
       }
     ]
