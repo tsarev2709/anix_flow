@@ -241,7 +241,7 @@ const ScriptSection = ({ setActiveTab }) => {
   };
 
   if (!currentProject) {
-    return <div className="p-6 text-white">No project selected</div>;
+    return <div className="p-6 text-white">Реальность не выбрана</div>;
   }
 
   return (
@@ -249,8 +249,8 @@ const ScriptSection = ({ setActiveTab }) => {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-white mb-2">Script Generation</h1>
-          <p className="text-gray-400">Create and refine your animation script</p>
+          <h1 className="text-2xl font-bold text-white mb-2">Создание сценария</h1>
+          <p className="text-gray-400">Напишите историю, которая оживёт</p>
         </div>
         
         <div className="flex items-center space-x-3">
@@ -262,14 +262,14 @@ const ScriptSection = ({ setActiveTab }) => {
             className="border-white/20 text-white hover:bg-white/10"
           >
             <History className="h-4 w-4 mr-2" />
-            History
+            История
           </Button>
           <Button 
             variant="outline"
             className="border-white/20 text-white hover:bg-white/10"
           >
             <Download className="h-4 w-4 mr-2" />
-            Export
+            Экспорт
           </Button>
         </div>
       </div>
@@ -281,17 +281,17 @@ const ScriptSection = ({ setActiveTab }) => {
             <CardHeader>
               <CardTitle className="text-white flex items-center">
                 <MessageSquare className="h-5 w-5 mr-2 text-teal-400" />
-                Story Input
+                Вселенная вашего сюжета
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <label className="text-sm text-gray-300 mb-2 block">Describe your animation story...</label>
+                <label className="text-sm text-gray-300 mb-2 block">Опишите мир, который должен ожить...</label>
                 <Textarea
                   value={userPrompt}
                   onChange={(e) => handleUserPromptChange(e.target.value)}
                   className="bg-white/5 border-white/20 text-white placeholder-gray-500 resize-none focus:border-teal-400/50 focus:ring-teal-400/20 min-h-[80px]"
-                  placeholder="A curious robot discovers friendship with a cat in a dusty laboratory..."
+                  placeholder="Любопытный робот заводит дружбу с котом в пыльной лаборатории..."
                 />
               </div>
             </CardContent>
@@ -301,12 +301,12 @@ const ScriptSection = ({ setActiveTab }) => {
             <CardHeader>
               <CardTitle className="text-white flex items-center">
                 <Wand2 className="h-5 w-5 mr-2 text-teal-400" />
-                AI Generation
+                ИИ генерация
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <label className="text-sm text-gray-300 mb-2 block">Narrator Character</label>
+                <label className="text-sm text-gray-300 mb-2 block">Характер расссказчика</label>
                 <Select value={selectedNarrator} onValueChange={setSelectedNarrator}>
                   <SelectTrigger className="bg-white/5 border-white/20 text-white">
                     <SelectValue />
@@ -339,7 +339,7 @@ const ScriptSection = ({ setActiveTab }) => {
                     className="w-full border-white/20 text-white hover:bg-white/10"
                   >
                     <RefreshCw className="h-4 w-4 mr-2" />
-                    Try Different Version
+                    Попробовать иначе
                   </Button>
                 )}
               </div>
@@ -348,7 +348,7 @@ const ScriptSection = ({ setActiveTab }) => {
                 <div className="text-center py-4">
                   <div className="inline-flex items-center space-x-2 text-teal-400">
                     <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-teal-400"></div>
-                    <span className="text-sm">Generating script...</span>
+                    <span className="text-sm">Создание сценария...</span>
                   </div>
                 </div>
               )}
@@ -364,15 +364,15 @@ const ScriptSection = ({ setActiveTab }) => {
               <CardContent>
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between">
-                    <span className="text-gray-400">Scenes:</span>
+                    <span className="text-gray-400">Количество сцен:</span>
                     <span className="text-white">{currentProject.script.scenes?.length || 0}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-400">Narrator:</span>
+                    <span className="text-gray-400">Рассказчик:</span>
                     <span className="text-white">{NARRATOR_OPTIONS.find(n => n.value === selectedNarrator)?.label}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-400">Total Duration:</span>
+                    <span className="text-gray-400">Общая длительность:</span>
                     <span className="text-white">
                       {currentProject.script.scenes?.reduce((sum, scene) => sum + scene.duration, 0) || 0}s
                     </span>
@@ -415,7 +415,7 @@ const ScriptSection = ({ setActiveTab }) => {
                           className="border-white/20 text-white hover:bg-white/10"
                         >
                           <RefreshCw className="h-3 w-3 mr-1" />
-                          Regenerate
+                          Перегенерация
                         </Button>
                         <Button
                           size="sm"
@@ -448,7 +448,7 @@ const ScriptSection = ({ setActiveTab }) => {
                     className="w-full border-white/20 text-white hover:bg-white/10"
                   >
                     <Plus className="h-4 w-4 mr-2" />
-                    Add New Scene
+                    Добавить новую сцену
                   </Button>
                 </CardContent>
               </Card>
@@ -457,14 +457,14 @@ const ScriptSection = ({ setActiveTab }) => {
               <Card className="bg-gradient-to-r from-teal-500/10 to-purple-500/10 border-teal-400/30 backdrop-blur-xl">
                 <CardContent className="p-6">
                   <div className="text-center">
-                    <h3 className="text-lg font-semibold text-white mb-2">Script Complete!</h3>
-                    <p className="text-gray-300 mb-4">Ready to create visual storyboards for your scenes?</p>
+                    <h3 className="text-lg font-semibold text-white mb-2">Сценарий написан!</h3>
+                    <p className="text-gray-300 mb-4">Готовы визуализировать ваш сценарий?</p>
                     <Button 
                       onClick={handleSendToStoryboard}
                       className="bg-gradient-to-r from-teal-500 to-purple-500 hover:from-teal-600 hover:to-purple-600 text-white border-0"
                     >
                       <Send className="h-4 w-4 mr-2" />
-                      Send to Storyboard
+                      Отправить в раскадровку
                     </Button>
                   </div>
                 </CardContent>
@@ -474,8 +474,8 @@ const ScriptSection = ({ setActiveTab }) => {
             <Card className="bg-[#161616]/60 backdrop-blur-xl border-white/10 h-96 flex items-center justify-center">
               <div className="text-center">
                 <Wand2 className="h-12 w-12 text-gray-500 mx-auto mb-4" />
-                <h3 className="text-lg font-semibold text-white mb-2">No Script Generated</h3>
-                <p className="text-gray-400 mb-4">Add your story description and click "Generate Script" to create your animation script</p>
+                <h3 className="text-lg font-semibold text-white mb-2">Вселенная ждёт своего сценария</h3>
+                <p className="text-gray-400 mb-4">Опишите историю и нажмите генерацию, чтобы вдохнуть жизнь в ваши идеи</p>
               </div>
             </Card>
           )}
@@ -486,26 +486,26 @@ const ScriptSection = ({ setActiveTab }) => {
       <AlertDialog open={deleteSceneIndex !== null} onOpenChange={() => setDeleteSceneIndex(null)}>
         <AlertDialogContent className="bg-[#161616] border-white/20">
           <AlertDialogHeader>
-            <AlertDialogTitle className="text-white">Delete Scene</AlertDialogTitle>
+            <AlertDialogTitle className="text-white">Стирание эпизода</AlertDialogTitle>
             <AlertDialogDescription className="text-gray-400">
-              Are you sure you want to delete Scene {deleteSceneIndex !== null ? deleteSceneIndex + 1 : ''}? This action cannot be undone.
+              Точно стереть Сцену {deleteSceneIndex !== null ? deleteSceneIndex + 1 : ''}? Эпизод исчезнет навсегда.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel className="bg-white/5 border-white/20 text-white hover:bg-white/10">
-              Cancel
+              Оставить в истории
             </AlertDialogCancel>
             <AlertDialogAction 
               onClick={() => handleDeleteScene(deleteSceneIndex)}
               className="bg-red-500 hover:bg-red-600 text-white"
             >
-              Delete Scene
+              Стереть в ничто
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </div>
-  );
+      </div>
+      );
 };
 
 export default ScriptSection;
