@@ -57,22 +57,34 @@ export const SCRIPT_PRESETS = {
 
 export const IMAGE_PRESETS = {
   realistic: {
-    scene1: "https://picsum.photos/seed/robot-lab-01/800/450",
-    scene2: "https://picsum.photos/seed/robot-step-01/800/450", 
-    scene3: "https://picsum.photos/seed/cat-shelf-01/800/450",
-    scene4: "https://picsum.photos/seed/robot-cat-01/800/450"
+    scene1: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=800&h=450&fit=crop",
+    scene2: "https://images.unsplash.com/photo-1581092580497-e0d23cbdf1dc?w=800&h=450&fit=crop",
+    scene3: "https://images.unsplash.com/photo-1581092918056-0c4c3acd3789?w=800&h=450&fit=crop",
+    scene4: "https://images.unsplash.com/photo-1581092921461-eab62e97a780?w=800&h=450&fit=crop"
   },
   cinematic: {
-    scene1: "https://picsum.photos/seed/robot-lab-cinema/800/450",
-    scene2: "https://picsum.photos/seed/robot-step-cinema/800/450",
-    scene3: "https://picsum.photos/seed/cat-shelf-cinema/800/450", 
-    scene4: "https://picsum.photos/seed/robot-cat-cinema/800/450"
+    scene1: "https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=800&h=450&fit=crop",
+    scene2: "https://images.unsplash.com/photo-1460881680858-30d872d5b530?w=800&h=450&fit=crop",
+    scene3: "https://images.unsplash.com/photo-1536240478700-b869070f9279?w=800&h=450&fit=crop",
+    scene4: "https://images.unsplash.com/photo-1518843025960-d60217f226f5?w=800&h=450&fit=crop"
   },
   artistic: {
-    scene1: "https://picsum.photos/seed/robot-lab-art/800/450",
-    scene2: "https://picsum.photos/seed/robot-step-art/800/450",
-    scene3: "https://picsum.photos/seed/cat-shelf-art/800/450",
-    scene4: "https://picsum.photos/seed/robot-cat-art/800/450"
+    scene1: "https://images.unsplash.com/photo-1541961017774-22349e4a1262?w=800&h=450&fit=crop",
+    scene2: "https://images.unsplash.com/photo-1550684848-fac1c5b4e853?w=800&h=450&fit=crop",
+    scene3: "https://images.unsplash.com/photo-1544787219-7f47ccb76574?w=800&h=450&fit=crop",
+    scene4: "https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=800&h=450&fit=crop"
+  },
+  futuristic: {
+    scene1: "https://images.unsplash.com/photo-1446776653964-20c1d3a81b06?w=800&h=450&fit=crop",
+    scene2: "https://images.unsplash.com/photo-1446776877081-d282a0f896e2?w=800&h=450&fit=crop",
+    scene3: "https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?w=800&h=450&fit=crop",
+    scene4: "https://images.unsplash.com/photo-1446776899648-aa785fcac9cb?w=800&h=450&fit=crop"
+  },
+  vintage: {
+    scene1: "https://images.unsplash.com/photo-1505852679233-d9fd70aff56d?w=800&h=450&fit=crop",
+    scene2: "https://images.unsplash.com/photo-1506929562872-bb421503ef21?w=800&h=450&fit=crop",
+    scene3: "https://images.unsplash.com/photo-1465146344425-f00d5f5c8f07?w=800&h=450&fit=crop",
+    scene4: "https://images.unsplash.com/photo-1505855796860-aa05646cbf1f?w=800&h=450&fit=crop"
   }
 };
 
