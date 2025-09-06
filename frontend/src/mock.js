@@ -135,23 +135,23 @@ export const MUSIC_GENRES = [
 export const SAMPLE_PROJECTS = [
   {
     id: "project1",
-    name: "The Robot's First Day",
+    name: "Производство бипок",
     lastModified: "2024-01-15T10:30:00Z",
     status: "Completed",
-    thumbnail: "https://picsum.photos/seed/project1/300/200"
+    thumbnail: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=800&h=450&fit=crop"
   },
   {
     id: "project2", 
-    name: "Digital Dreams",
+    name: "ЛСД",
     lastModified: "2024-01-14T16:45:00Z",
     status: "In Progress",
-    thumbnail: "https://picsum.photos/seed/project2/300/200"
+    thumbnail: "https://images.unsplash.com/photo-1541961017774-22349e4a1262?w=800&h=450&fit=crop"
   },
   {
     id: "project3",
-    name: "AI Awakening",
+    name: "Дагестан",
     lastModified: "2024-01-12T09:15:00Z", 
     status: "Draft",
-    thumbnail: "https://picsum.photos/seed/project3/300/200"
+    thumbnail: "https://images.unsplash.com/photo-1505852679233-d9fd70aff56d?w=800&h=450&fit=crop"
   }
 ];
