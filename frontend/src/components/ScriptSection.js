@@ -39,8 +39,8 @@ const ScriptSection = ({ setActiveTab }) => {
     setIsGenerating(false);
     
     toast({
-      title: "Script Generated",
-      description: "Your animation script has been created successfully!",
+      title: "Сценарий создан!",
+      description: "Ваша вселенная готова к рождению!",
     });
   };
 
@@ -67,8 +67,8 @@ const ScriptSection = ({ setActiveTab }) => {
     setIsGenerating(false);
     
     toast({
-      title: "Script Regenerated",
-      description: "A new version of your script has been created!",
+      title: "Сценарий обновлён!",
+      description: "Новая версия уже ждёт вас!",
     });
   };
 
@@ -106,8 +106,8 @@ const ScriptSection = ({ setActiveTab }) => {
     setIsGenerating(false);
     
     toast({
-      title: "Scene Regenerated",
-      description: `Scene ${sceneIndex + 1} has been updated!`,
+      title: "Сцена обновлена!",
+      description: `Сцена ${sceneIndex + 1} перезаписана новой реальностью!`,
     });
   };
 
@@ -147,8 +147,8 @@ const ScriptSection = ({ setActiveTab }) => {
     
     updateProject(updatedProject);
     toast({
-      title: "Scene Added",
-      description: "New scene has been added to your script.",
+      title: "Сцена добавлена!",
+      description: "Новая сцена добавлена в вашу вселенную!",
     });
   };
 
@@ -165,8 +165,8 @@ const ScriptSection = ({ setActiveTab }) => {
     setDeleteSceneIndex(null);
     
     toast({
-      title: "Scene Deleted",
-      description: "Scene has been removed from your script.",
+      title: "Сцена удалена!",
+      description: "Эпизод стёрт из хроники мира!",
     });
   };
 
@@ -199,8 +199,8 @@ const ScriptSection = ({ setActiveTab }) => {
     updateProject(updatedProject);
     
     toast({
-      title: "Sent to Storyboard",
-      description: "Script has been sent and storyboard images auto-generated!",
+      title: "В раскадровку!",
+      description: "Сценарий перенесён и визуализирован!",
     });
     setActiveTab('storyboard');
   };
@@ -235,8 +235,8 @@ const ScriptSection = ({ setActiveTab }) => {
     setDraggedIndex(null);
     
     toast({
-      title: "Scenes Reordered",
-      description: "Scene order has been updated!",
+      title: "Сцены перестроены!",
+      description: "Хронус успешно изменён!",
     });
   };
 
