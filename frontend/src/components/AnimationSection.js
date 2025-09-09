@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Play, Plus, Send, Download, History, Edit, MessageSquare, ArrowUp, Trash2 } from 'lucide-react';
+import { Play, Plus, RotateCcw, Send, Download, History, Edit, MessageSquare, RefreshCw, ArrowUp, Trash2 } from 'lucide-react';
 import { Button } from './ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Badge } from './ui/badge';
@@ -127,6 +127,73 @@ const AnimationSection = ({ setActiveTab }) => {
     toast({
       title: "Keyframe Modified",
       description: `Keyframe updated based on prompt: "${modifyPrompt}"`,
+    });
+  };
+
+  const handleUpscaleKeyframe = async (sceneId, keyframeId) => {
+    setIsProcessing(true);
+    await new Promise(resolve => setTimeout(resolve, 1500));
+
+    const updatedAnimation = {
+      ...currentProject.animation,
+      scenes: currentProject.animation.scenes.map(scene => {
+        if (scene.id === sceneId) {
+          return {
+            ...scene,
+            keyframes: scene.keyframes.map(keyframe => {
+              if (keyframe.id === keyframeId) {
+                const newHistoryEntry = {
+                  id: `keyframe_history_${Date.now()}`,
+                  image: keyframe.image,
+                  timestamp: new Date().toISOString(),
+                  style: 'upscaled',
+                  prompt: null
+                };
+
+                return {
+                  ...keyframe,
+                  history: [newHistoryEntry, ...(keyframe.history || [])]
+                };
+              }
+              return keyframe;
+            })
+          };
+        }
+        return scene;
+      })
+    };
+
+    const updatedProject = { ...currentProject, animation: updatedAnimation };
+    updateProject(updatedProject);
+    setIsProcessing(false);
+
+    toast({
+      title: "Keyframe Upscaled",
+      description: "Keyframe image has been upscaled.",
+    });
+  };
+
+  const handleDeleteKeyframe = (sceneId, keyframeId) => {
+    const updatedAnimation = {
+      ...currentProject.animation,
+      scenes: currentProject.animation.scenes.map(scene => {
+        if (scene.id === sceneId) {
+          return {
+            ...scene,
+            keyframes: scene.keyframes.filter(k => k.id !== keyframeId)
+          };
+        }
+        return scene;
+      })
+    };
+
+    const updatedProject = { ...currentProject, animation: updatedAnimation };
+    updateProject(updatedProject);
+    setSelectedKeyframe(null);
+
+    toast({
+      title: "Keyframe Deleted",
+      description: "The keyframe has been removed from the timeline.",
     });
   };
 
