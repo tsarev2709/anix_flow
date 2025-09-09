@@ -358,7 +358,7 @@ const SoundSection = () => {
                   <span className="text-white text-sm">Sound Effects</span>
                 </div>
                 <div className="h-12 bg-white/5 rounded border border-white/10 flex items-center justify-center">
-                  <span className="text-gray-500 text-xs">Coming soon...</span>
+                  <span className="text-gray-500 text-xs">No sound effects - coming soon</span>
                 </div>
               </div>
 
