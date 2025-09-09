@@ -19,6 +19,7 @@ const AnimationSection = ({ setActiveTab }) => {
   const [selectedKeyframe, setSelectedKeyframe] = useState(null);
   const [modifyPrompt, setModifyPrompt] = useState('');
   const [historyKeyframeId, setHistoryKeyframeId] = useState(null);
+  const [imageResolution, setImageResolution] = useState('');
 
   const handleAddKeyframe = (sceneId) => {
     const updatedAnimation = {
@@ -59,55 +60,7 @@ const AnimationSection = ({ setActiveTab }) => {
 
   const handleSelectKeyframe = (sceneId, keyframeId) => {
     setSelectedKeyframe({ sceneId, keyframeId });
-  };
-
-  const handleRegenerateKeyframe = async (sceneId, keyframeId) => {
-    setIsProcessing(true);
-    await new Promise(resolve => setTimeout(resolve, 1500));
-
-    const updatedAnimation = {
-      ...currentProject.animation,
-      scenes: currentProject.animation.scenes.map(scene => {
-        if (scene.id === sceneId) {
-          return {
-            ...scene,
-            keyframes: scene.keyframes.map(keyframe => {
-              if (keyframe.id === keyframeId) {
-                // Cycle through different preset images
-                const styles = Object.keys(IMAGE_PRESETS);
-                const randomStyle = styles[Math.floor(Math.random() * styles.length)];
-                const newImage = IMAGE_PRESETS[randomStyle][sceneId] || keyframe.image;
-                
-                const newHistoryEntry = {
-                  id: `keyframe_history_${Date.now()}`,
-                  image: newImage,
-                  timestamp: new Date().toISOString(),
-                  style: randomStyle,
-                  prompt: null
-                };
-                
-                return {
-                  ...keyframe,
-                  image: newImage,
-                  history: [newHistoryEntry, ...(keyframe.history || [])]
-                };
-              }
-              return keyframe;
-            })
-          };
-        }
-        return scene;
-      })
-    };
-
-    const updatedProject = { ...currentProject, animation: updatedAnimation };
-    updateProject(updatedProject);
-    setIsProcessing(false);
-
-    toast({
-      title: "Keyframe Regenerated",
-      description: "New variation has been generated!",
-    });
+    setImageResolution('');
   };
 
   const handleModifyKeyframeWithPrompt = async (sceneId, keyframeId) => {
@@ -174,6 +127,73 @@ const AnimationSection = ({ setActiveTab }) => {
     toast({
       title: "Keyframe Modified",
       description: `Keyframe updated based on prompt: "${modifyPrompt}"`,
+    });
+  };
+
+  const handleUpscaleKeyframe = async (sceneId, keyframeId) => {
+    setIsProcessing(true);
+    await new Promise(resolve => setTimeout(resolve, 1500));
+
+    const updatedAnimation = {
+      ...currentProject.animation,
+      scenes: currentProject.animation.scenes.map(scene => {
+        if (scene.id === sceneId) {
+          return {
+            ...scene,
+            keyframes: scene.keyframes.map(keyframe => {
+              if (keyframe.id === keyframeId) {
+                const newHistoryEntry = {
+                  id: `keyframe_history_${Date.now()}`,
+                  image: keyframe.image,
+                  timestamp: new Date().toISOString(),
+                  style: 'upscaled',
+                  prompt: null
+                };
+
+                return {
+                  ...keyframe,
+                  history: [newHistoryEntry, ...(keyframe.history || [])]
+                };
+              }
+              return keyframe;
+            })
+          };
+        }
+        return scene;
+      })
+    };
+
+    const updatedProject = { ...currentProject, animation: updatedAnimation };
+    updateProject(updatedProject);
+    setIsProcessing(false);
+
+    toast({
+      title: "Keyframe Upscaled",
+      description: "Keyframe image has been upscaled.",
+    });
+  };
+
+  const handleDeleteKeyframe = (sceneId, keyframeId) => {
+    const updatedAnimation = {
+      ...currentProject.animation,
+      scenes: currentProject.animation.scenes.map(scene => {
+        if (scene.id === sceneId) {
+          return {
+            ...scene,
+            keyframes: scene.keyframes.filter(k => k.id !== keyframeId)
+          };
+        }
+        return scene;
+      })
+    };
+
+    const updatedProject = { ...currentProject, animation: updatedAnimation };
+    updateProject(updatedProject);
+    setSelectedKeyframe(null);
+
+    toast({
+      title: "Keyframe Deleted",
+      description: "The keyframe has been removed from the timeline.",
     });
   };
 
@@ -597,7 +617,7 @@ const AnimationSection = ({ setActiveTab }) => {
       )}
 
       {/* Keyframe Editor Modal */}
-      <Dialog open={!!selectedKeyframe} onOpenChange={(open) => { if (!open) { setSelectedKeyframe(null); setModifyPrompt(''); } }}>
+      <Dialog open={!!selectedKeyframe} onOpenChange={(open) => { if (!open) { setSelectedKeyframe(null); setModifyPrompt(''); setImageResolution(''); } }}>
         <DialogContent className="bg-[#161616]/60 backdrop-blur-xl border-white/20 max-w-3xl">
           <DialogHeader>
             <DialogTitle className="text-white flex items-center">
@@ -611,17 +631,10 @@ const AnimationSection = ({ setActiveTab }) => {
                 src={currentKeyframe.image}
                 alt="Selected keyframe"
                 className="w-full h-64 object-cover rounded border border-blue-400/50"
+                onLoad={(e) => setImageResolution(`${e.target.naturalWidth}x${e.target.naturalHeight}`)}
               />
+              <div className="text-right text-sm text-gray-400">{imageResolution}</div>
               <div className="flex items-center space-x-2 flex-wrap">
-                <Button
-                  size="sm"
-                  onClick={() => handleRegenerateKeyframe(selectedKeyframe.sceneId, selectedKeyframe.keyframeId)}
-                  disabled={isProcessing}
-                  className="bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 border border-purple-500/30"
-                >
-                  <RefreshCw className="h-3 w-3 mr-1" />
-                  Regenerate
-                </Button>
                 <Button
                   size="sm"
                   onClick={() => setHistoryKeyframeId(selectedKeyframe.keyframeId)}
