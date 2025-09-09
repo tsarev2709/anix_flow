@@ -260,7 +260,7 @@ const SoundSection = () => {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-2">
                     <Mic className="h-4 w-4 text-blue-400" />
-                    <span className="text-white text-sm">Voiceover</span>
+                    <span className="text-white text-sm">Voiceovеr</span>
                   </div>
                   <div className="flex items-center space-x-2">
                     <Volume2 className="h-3 w-3 text-gray-400" />
