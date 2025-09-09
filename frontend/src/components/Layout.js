@@ -1,13 +1,44 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Bot, Home, FileText, Image, Play, Volume2, Settings, LogOut, ChevronDown } from 'lucide-react';
 import { Button } from './ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
+import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
+import { Switch } from './ui/switch';
+import { Slider } from './ui/slider';
+import { Label } from './ui/label';
 import { useAuth } from '../contexts/AuthContext';
 import { useProject } from '../contexts/ProjectContext';
 
 const Layout = ({ children, activeTab, setActiveTab }) => {
   const { logout } = useAuth();
   const { projects, currentProject, setCurrentProject } = useProject();
+
+  const [musicEnabled, setMusicEnabled] = useState(false);
+  const [musicVolume, setMusicVolume] = useState([50]);
+  const audioRef = useRef(null);
+
+  useEffect(() => {
+    audioRef.current = new Audio('/audio/bg-music.mp3');
+    audioRef.current.loop = true;
+    audioRef.current.volume = musicVolume[0] / 100;
+    return () => {
+      audioRef.current && audioRef.current.pause();
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!audioRef.current) return;
+    audioRef.current.volume = musicVolume[0] / 100;
+  }, [musicVolume]);
+
+  useEffect(() => {
+    if (!audioRef.current) return;
+    if (musicEnabled) {
+      audioRef.current.play();
+    } else {
+      audioRef.current.pause();
+    }
+  }, [musicEnabled]);
 
   const tabs = [
     { id: 'dashboard', label: 'Мои проекты', icon: Home },
@@ -69,13 +100,32 @@ const Layout = ({ children, activeTab, setActiveTab }) => {
 
         {/* Settings */}
         <div className="p-4 border-t border-white/10 space-y-2">
-          <Button
-            variant="ghost"
-            className="w-full justify-start text-gray-400 hover:text-white hover:bg-white/5"
-          >
-            <Settings className="h-5 w-5 mr-3" />
-            Настройки
-          </Button>
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button
+                variant="ghost"
+                className="w-full justify-start text-gray-400 hover:text-white hover:bg-white/5"
+              >
+                <Settings className="h-5 w-5 mr-3" />
+                Настройки
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="bg-[#161616] border-white/10 text-white">
+              <DialogHeader>
+                <DialogTitle>Настройки</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="bg-music" className="text-sm">Фоновая музыка</Label>
+                  <Switch id="bg-music" checked={musicEnabled} onCheckedChange={setMusicEnabled} />
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-sm">Громкость</Label>
+                  <Slider value={musicVolume} onValueChange={setMusicVolume} max={100} step={1} />
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
           <Button
             variant="ghost"
             onClick={logout}
