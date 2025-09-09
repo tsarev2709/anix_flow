@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { Play, Plus, RotateCcw, Send, Download, History, Square, Edit, MessageSquare } from 'lucide-react';
+import { Play, Plus, RotateCcw, Send, Download, History, Edit, MessageSquare, RefreshCw, ArrowUp, Trash2 } from 'lucide-react';
 import { Button } from './ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Badge } from './ui/badge';
 import { Progress } from './ui/progress';
 import { Input } from './ui/input';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
 import { useProject } from '../contexts/ProjectContext';
 import { useToast } from '../hooks/use-toast';
 import { IMAGE_PRESETS } from '../mock';
@@ -173,6 +174,73 @@ const AnimationSection = ({ setActiveTab }) => {
     toast({
       title: "Keyframe Modified",
       description: `Keyframe updated based on prompt: "${modifyPrompt}"`,
+    });
+  };
+
+  const handleUpscaleKeyframe = async (sceneId, keyframeId) => {
+    setIsProcessing(true);
+    await new Promise(resolve => setTimeout(resolve, 1500));
+
+    const updatedAnimation = {
+      ...currentProject.animation,
+      scenes: currentProject.animation.scenes.map(scene => {
+        if (scene.id === sceneId) {
+          return {
+            ...scene,
+            keyframes: scene.keyframes.map(keyframe => {
+              if (keyframe.id === keyframeId) {
+                const newHistoryEntry = {
+                  id: `keyframe_history_${Date.now()}`,
+                  image: keyframe.image,
+                  timestamp: new Date().toISOString(),
+                  style: 'upscaled',
+                  prompt: null
+                };
+
+                return {
+                  ...keyframe,
+                  history: [newHistoryEntry, ...(keyframe.history || [])]
+                };
+              }
+              return keyframe;
+            })
+          };
+        }
+        return scene;
+      })
+    };
+
+    const updatedProject = { ...currentProject, animation: updatedAnimation };
+    updateProject(updatedProject);
+    setIsProcessing(false);
+
+    toast({
+      title: "Keyframe Upscaled",
+      description: "Keyframe image has been upscaled.",
+    });
+  };
+
+  const handleDeleteKeyframe = (sceneId, keyframeId) => {
+    const updatedAnimation = {
+      ...currentProject.animation,
+      scenes: currentProject.animation.scenes.map(scene => {
+        if (scene.id === sceneId) {
+          return {
+            ...scene,
+            keyframes: scene.keyframes.filter(k => k.id !== keyframeId)
+          };
+        }
+        return scene;
+      })
+    };
+
+    const updatedProject = { ...currentProject, animation: updatedAnimation };
+    updateProject(updatedProject);
+    setSelectedKeyframe(null);
+
+    toast({
+      title: "Keyframe Deleted",
+      description: "The keyframe has been removed from the timeline.",
     });
   };
 
@@ -385,82 +453,6 @@ const AnimationSection = ({ setActiveTab }) => {
         </Card>
       ) : (
         <div className="space-y-6">
-          {/* Selected Keyframe Toolbar */}
-          {selectedKeyframe && currentKeyframe && (
-            <Card className="bg-blue-500/10 border-blue-400/30 backdrop-blur-xl">
-              <CardHeader>
-                <CardTitle className="text-blue-300 text-lg flex items-center">
-                  <Edit className="h-5 w-5 mr-2" />
-                  Keyframe Editor - Scene {currentProject.animation.scenes.findIndex(s => s.id === selectedKeyframe.sceneId) + 1}
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex items-center space-x-4">
-                  <div className="flex-shrink-0">
-                    <img 
-                      src={currentKeyframe.image} 
-                      alt="Selected keyframe"
-                      className="w-24 h-16 object-cover rounded border border-blue-400/50"
-                    />
-                  </div>
-                  
-                  <div className="flex-1 space-y-2">
-                    <div className="flex items-center space-x-2">
-                      <Button
-                        size="sm"
-                        onClick={() => handleRegenerateKeyframe(selectedKeyframe.sceneId, selectedKeyframe.keyframeId)}
-                        disabled={isProcessing}
-                        className="bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 border border-purple-500/30"
-                      >
-                        <RefreshCw className="h-3 w-3 mr-1" />
-                        Regenerate
-                      </Button>
-                      <Button
-                        size="sm"
-                        onClick={() => setHistoryKeyframeId(selectedKeyframe.keyframeId)}
-                        className="bg-yellow-500/20 hover:bg-yellow-500/30 text-yellow-300 border border-yellow-500/30"
-                      >
-                        <History className="h-3 w-3 mr-1" />
-                        History
-                      </Button>
-                      <Button
-                        size="sm"
-                        onClick={() => setSelectedKeyframe(null)}
-                        variant="outline"
-                        className="border-white/20 text-white hover:bg-white/10"
-                      >
-                        Close
-                      </Button>
-                    </div>
-                    
-                    <div className="flex items-center space-x-2">
-                      <MessageSquare className="h-4 w-4 text-blue-400" />
-                      <Input
-                        value={modifyPrompt}
-                        onChange={(e) => setModifyPrompt(e.target.value)}
-                        placeholder="Enter modification prompt..."
-                        className="bg-white/5 border-white/20 text-white placeholder-gray-500 flex-1"
-                        onKeyPress={(e) => {
-                          if (e.key === 'Enter') {
-                            handleModifyKeyframeWithPrompt(selectedKeyframe.sceneId, selectedKeyframe.keyframeId);
-                          }
-                        }}
-                      />
-                      <Button
-                        size="sm"
-                        onClick={() => handleModifyKeyframeWithPrompt(selectedKeyframe.sceneId, selectedKeyframe.keyframeId)}
-                        disabled={isProcessing}
-                        className="bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 border border-blue-500/30"
-                      >
-                        Apply
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
           {/* Timeline */}
           <Card className="bg-[#161616]/60 backdrop-blur-xl border-white/10">
             <CardHeader>
@@ -603,6 +595,93 @@ const AnimationSection = ({ setActiveTab }) => {
           )}
         </div>
       )}
+
+      {/* Keyframe Editor Modal */}
+      <Dialog open={!!selectedKeyframe} onOpenChange={(open) => { if (!open) { setSelectedKeyframe(null); setModifyPrompt(''); } }}>
+        <DialogContent className="bg-[#161616]/60 backdrop-blur-xl border-white/20 max-w-3xl">
+          <DialogHeader>
+            <DialogTitle className="text-white flex items-center">
+              <Edit className="h-5 w-5 mr-2 text-blue-400" />
+              Keyframe Editor - Scene {selectedKeyframe ? currentProject.animation.scenes.findIndex(s => s.id === selectedKeyframe.sceneId) + 1 : ''}
+            </DialogTitle>
+          </DialogHeader>
+          {selectedKeyframe && currentKeyframe && (
+            <div className="space-y-4">
+              <img
+                src={currentKeyframe.image}
+                alt="Selected keyframe"
+                className="w-full h-64 object-cover rounded border border-blue-400/50"
+              />
+              <div className="flex items-center space-x-2 flex-wrap">
+                <Button
+                  size="sm"
+                  onClick={() => handleRegenerateKeyframe(selectedKeyframe.sceneId, selectedKeyframe.keyframeId)}
+                  disabled={isProcessing}
+                  className="bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 border border-purple-500/30"
+                >
+                  <RefreshCw className="h-3 w-3 mr-1" />
+                  Regenerate
+                </Button>
+                <Button
+                  size="sm"
+                  onClick={() => setHistoryKeyframeId(selectedKeyframe.keyframeId)}
+                  className="bg-yellow-500/20 hover:bg-yellow-500/30 text-yellow-300 border border-yellow-500/30"
+                >
+                  <History className="h-3 w-3 mr-1" />
+                  History
+                </Button>
+                <Button
+                  size="sm"
+                  onClick={() => handleUpscaleKeyframe(selectedKeyframe.sceneId, selectedKeyframe.keyframeId)}
+                  disabled={isProcessing}
+                  className="bg-green-500/20 hover:bg-green-500/30 text-green-300 border border-green-500/30"
+                >
+                  <ArrowUp className="h-3 w-3 mr-1" />
+                  Upscale
+                </Button>
+                <Button
+                  size="sm"
+                  onClick={() => handleDeleteKeyframe(selectedKeyframe.sceneId, selectedKeyframe.keyframeId)}
+                  className="bg-red-500/20 hover:bg-red-500/30 text-red-300 border border-red-500/30"
+                >
+                  <Trash2 className="h-3 w-3 mr-1" />
+                  Delete
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => { setSelectedKeyframe(null); setModifyPrompt(''); }}
+                  className="border-white/20 text-white hover:bg-white/10"
+                >
+                  Close
+                </Button>
+              </div>
+              <div className="flex items-center space-x-2">
+                <MessageSquare className="h-4 w-4 text-blue-400" />
+                <Input
+                  value={modifyPrompt}
+                  onChange={(e) => setModifyPrompt(e.target.value)}
+                  placeholder="Enter modification prompt..."
+                  className="bg-white/5 border-white/20 text-white placeholder-gray-500 flex-1"
+                  onKeyPress={(e) => {
+                    if (e.key === 'Enter') {
+                      handleModifyKeyframeWithPrompt(selectedKeyframe.sceneId, selectedKeyframe.keyframeId);
+                    }
+                  }}
+                />
+                <Button
+                  size="sm"
+                  onClick={() => handleModifyKeyframeWithPrompt(selectedKeyframe.sceneId, selectedKeyframe.keyframeId)}
+                  disabled={isProcessing}
+                  className="bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 border border-blue-500/30"
+                >
+                  Apply
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
 
       {/* Keyframe Version History Modal */}
       <VersionHistoryModal
