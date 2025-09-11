@@ -102,10 +102,15 @@ const AnimationSection = ({ setActiveTab }) => {
             keyframes: scene.keyframes.map(keyframe => {
               if (keyframe.id === keyframeId) {
                 let newImage = keyframe.image;
+                let newVideo = keyframe.video;
                 let newStyle = 'realistic';
 
                 if (modifyImages.length > 0) {
-                  newImage = modifyImages[0];
+                  if (keyframe.type === 'keyframe') {
+                    newImage = modifyImages[0];
+                  } else {
+                    newVideo = modifyImages[0];
+                  }
                   newStyle = 'uploaded';
                 } else {
                   // For demo, choose style based on prompt keywords
@@ -117,20 +122,29 @@ const AnimationSection = ({ setActiveTab }) => {
                     const styles = Object.keys(IMAGE_PRESETS);
                     newStyle = styles[Math.floor(Math.random() * styles.length)];
                   }
-                  newImage = IMAGE_PRESETS[newStyle][sceneId] || keyframe.image;
+                  if (keyframe.type === 'keyframe') {
+                    newImage = IMAGE_PRESETS[newStyle][sceneId] || keyframe.image;
+                  } else {
+                    newVideo = "https://www.w3schools.com/html/mov_bbb.mp4";
+                  }
                 }
 
                 const newHistoryEntry = {
                   id: `keyframe_history_${Date.now()}`,
-                  image: newImage,
                   timestamp: new Date().toISOString(),
                   style: newStyle,
                   prompt: modifyPrompt || null
                 };
+                if (keyframe.type === 'keyframe') {
+                  newHistoryEntry.image = newImage;
+                } else {
+                  newHistoryEntry.video = newVideo;
+                }
 
                 return {
                   ...keyframe,
                   image: newImage,
+                  video: newVideo,
                   history: [newHistoryEntry, ...(keyframe.history || [])]
                 };
               }
@@ -149,8 +163,8 @@ const AnimationSection = ({ setActiveTab }) => {
     setModifyImages([]);
 
     toast({
-      title: "Keyframe Modified",
-      description: modifyPrompt ? `Keyframe updated based on prompt: "${modifyPrompt}"` : "Keyframe updated with uploaded image",
+      title: "Frame Modified",
+      description: modifyPrompt ? `Frame updated based on prompt: "${modifyPrompt}"` : "Frame updated with uploaded file",
     });
   };
 
@@ -168,11 +182,15 @@ const AnimationSection = ({ setActiveTab }) => {
               if (keyframe.id === keyframeId) {
                 const newHistoryEntry = {
                   id: `keyframe_history_${Date.now()}`,
-                  image: keyframe.image,
                   timestamp: new Date().toISOString(),
                   style: 'upscaled',
                   prompt: null
                 };
+                if (keyframe.type === 'keyframe') {
+                  newHistoryEntry.image = keyframe.image;
+                } else {
+                  newHistoryEntry.video = keyframe.video;
+                }
 
                 return {
                   ...keyframe,
@@ -192,8 +210,8 @@ const AnimationSection = ({ setActiveTab }) => {
     setIsProcessing(false);
 
     toast({
-      title: "Keyframe Upscaled",
-      description: "Keyframe image has been upscaled.",
+      title: "Frame Upscaled",
+      description: "Frame has been upscaled.",
     });
   };
 
@@ -216,8 +234,8 @@ const AnimationSection = ({ setActiveTab }) => {
     setSelectedKeyframe(null);
 
     toast({
-      title: "Keyframe Deleted",
-      description: "The keyframe has been removed from the timeline.",
+      title: "Frame Deleted",
+      description: "The frame has been removed from the timeline.",
     });
   };
 
@@ -229,10 +247,11 @@ const AnimationSection = ({ setActiveTab }) => {
         keyframes: scene.keyframes.map(keyframe => {
           if (keyframe.id === keyframeId) {
             const updatedHistory = [version, ...keyframe.history.filter(h => h.id !== version.id)];
-            
+
             return {
               ...keyframe,
-              image: version.image,
+              image: version.image || keyframe.image,
+              video: version.video || keyframe.video,
               history: updatedHistory
             };
           }
@@ -246,8 +265,8 @@ const AnimationSection = ({ setActiveTab }) => {
     setHistoryKeyframeId(null);
 
     toast({
-      title: "Keyframe Version Restored",
-      description: "Keyframe has been reverted to the selected version.",
+      title: "Frame Version Restored",
+      description: "Frame has been reverted to the selected version.",
     });
   };
 
@@ -257,10 +276,19 @@ const AnimationSection = ({ setActiveTab }) => {
       scenes: currentProject.animation.scenes.map(scene => {
         if (scene.id === sceneId) {
           const newKeyframes = [...scene.keyframes];
+          const placeholderVideo = "https://www.w3schools.com/html/mov_bbb.mp4";
           newKeyframes.splice(keyframeIndex + 1, 0, {
             id: `interpolated_${Date.now()}`,
-            type: 'interpolated',      
-            timestamp: (newKeyframes[keyframeIndex].timestamp + (newKeyframes[keyframeIndex + 1]?.timestamp || newKeyframes[keyframeIndex].timestamp + 2)) / 2
+            type: 'interpolated',
+            timestamp: (newKeyframes[keyframeIndex].timestamp + (newKeyframes[keyframeIndex + 1]?.timestamp || newKeyframes[keyframeIndex].timestamp + 2)) / 2,
+            video: placeholderVideo,
+            history: [{
+              id: `keyframe_history_${Date.now()}`,
+              video: placeholderVideo,
+              timestamp: new Date().toISOString(),
+              style: 'realistic',
+              prompt: null
+            }]
           });
           
           return { ...scene, keyframes: newKeyframes };
@@ -469,21 +497,29 @@ const AnimationSection = ({ setActiveTab }) => {
                     <div className="flex items-center space-x-2 overflow-x-auto">
                       {scene.keyframes.map((keyframe, index) => (
                         <div key={keyframe.id} className="flex items-center space-x-2 flex-shrink-0">
-                          <div 
+                          <div
                             className={`relative group cursor-pointer ${
-                              keyframe.type === 'keyframe' 
-                                ? 'bg-teal-500/20 border-teal-400/50' 
+                              keyframe.type === 'keyframe'
+                                ? 'bg-teal-500/20 border-teal-400/50'
                                 : 'bg-purple-500/20 border-purple-400/50'
                             } ${
                               selectedKeyframe?.keyframeId === keyframe.id ? 'ring-2 ring-blue-400' : ''
                             } border rounded-lg p-3 min-w-[120px] transition-all hover:scale-105`}
-                            onClick={() => keyframe.type === 'keyframe' ? handleSelectKeyframe(scene.id, keyframe.id) : null}
+                            onClick={() => handleSelectKeyframe(scene.id, keyframe.id)}
                           >
                             {keyframe.image && (
-                              <img 
-                                src={keyframe.image} 
+                              <img
+                                src={keyframe.image}
                                 alt={`Keyframe ${index + 1}`}
                                 className="w-full h-16 object-cover rounded mb-2"
+                              />
+                            )}
+                            {keyframe.video && (
+                              <video
+                                src={keyframe.video}
+                                className="w-full h-16 object-cover rounded mb-2"
+                                muted
+                                loop
                               />
                             )}
                             <div className="text-xs text-center">
@@ -573,23 +609,32 @@ const AnimationSection = ({ setActiveTab }) => {
         </div>
       )}
 
-      {/* Keyframe Editor Modal */}
+      {/* Frame Editor Modal */}
       <Dialog open={!!selectedKeyframe} onOpenChange={(open) => { if (!open) { setSelectedKeyframe(null); setModifyPrompt(''); setImageResolution(''); } }}>
         <DialogContent className="bg-[#161616]/60 backdrop-blur-xl border-white/20 max-w-3xl">
           <DialogHeader>
             <DialogTitle className="text-white flex items-center">
               <Edit className="h-5 w-5 mr-2 text-blue-400" />
-              Keyframe Editor - Scene {selectedKeyframe ? currentProject.animation.scenes.findIndex(s => s.id === selectedKeyframe.sceneId) + 1 : ''}
+              Frame Editor - Scene {selectedKeyframe ? currentProject.animation.scenes.findIndex(s => s.id === selectedKeyframe.sceneId) + 1 : ''}
             </DialogTitle>
           </DialogHeader>
           {selectedKeyframe && currentKeyframe && (
             <div className="space-y-4">
-              <img
-                src={currentKeyframe.image}
-                alt="Selected keyframe"
-                className="w-full h-64 object-cover rounded border border-blue-400/50"
-                onLoad={(e) => setImageResolution(`${e.target.naturalWidth}x${e.target.naturalHeight}`)}
-              />
+              {currentKeyframe.type === 'keyframe' ? (
+                <img
+                  src={currentKeyframe.image}
+                  alt="Selected keyframe"
+                  className="w-full h-64 object-cover rounded border border-blue-400/50"
+                  onLoad={(e) => setImageResolution(`${e.target.naturalWidth}x${e.target.naturalHeight}`)}
+                />
+              ) : (
+                <video
+                  src={currentKeyframe.video}
+                  controls
+                  className="w-full h-64 object-cover rounded border border-blue-400/50"
+                  onLoadedMetadata={(e) => setImageResolution(`${e.target.videoWidth}x${e.target.videoHeight}`)}
+                />
+              )}
               <div className="text-right text-sm text-gray-400">{imageResolution}</div>
               <div className="flex items-center space-x-2 flex-wrap">
                 <Button
@@ -649,7 +694,7 @@ const AnimationSection = ({ setActiveTab }) => {
                   <input
                     id="modify-image-upload"
                     type="file"
-                    accept="image/*"
+                    accept="image/*,video/*"
                     multiple
                     onChange={handleModifyImageUpload}
                     className="hidden"
@@ -668,11 +713,18 @@ const AnimationSection = ({ setActiveTab }) => {
                 <div className="flex space-x-2 mt-2">
                   {modifyImages.map((img, idx) => (
                     <div key={idx} className="relative">
-                      <img
-                        src={img}
-                        alt={`preview-${idx}`}
-                        className="h-12 w-12 object-cover rounded border border-white/20"
-                      />
+                      {img.startsWith('data:video') ? (
+                        <video
+                          src={img}
+                          className="h-12 w-12 object-cover rounded border border-white/20"
+                        />
+                      ) : (
+                        <img
+                          src={img}
+                          alt={`preview-${idx}`}
+                          className="h-12 w-12 object-cover rounded border border-white/20"
+                        />
+                      )}
                       <button
                         type="button"
                         onClick={() => handleRemoveModifyImage(idx)}
@@ -695,7 +747,7 @@ const AnimationSection = ({ setActiveTab }) => {
         onClose={() => setHistoryKeyframeId(null)}
         history={historyKeyframe?.history || []}
         onRevert={(version) => handleRevertKeyframeToVersion(historyKeyframeId, version)}
-        title="Keyframe History"
+        title="Frame History"
       />
     </div>
   );

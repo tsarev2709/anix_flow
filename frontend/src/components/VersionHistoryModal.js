@@ -40,16 +40,24 @@ const VersionHistoryModal = ({ isOpen, onClose, history, onRevert, title = "Vers
               <Card key={version.id || index} className="bg-white/5 border-white/10 hover:border-white/20 transition-colors">
                 <CardContent className="p-4">
                   <div className="flex items-start space-x-4">
-                    {/* Image Preview */}
+                    {/* Preview */}
                     <div className="flex-shrink-0">
-                      <img
-                        src={version.image}
-                        alt={`Version ${index + 1}`}
-                        className="w-24 h-16 object-cover rounded border border-white/20"
-                        onError={(e) => {
-                          e.target.src = "https://picsum.photos/200/120?grayscale";
-                        }}
-                      />
+                      {version.image ? (
+                        <img
+                          src={version.image}
+                          alt={`Version ${index + 1}`}
+                          className="w-24 h-16 object-cover rounded border border-white/20"
+                          onError={(e) => {
+                            e.target.src = "https://picsum.photos/200/120?grayscale";
+                          }}
+                        />
+                      ) : version.video ? (
+                        <video
+                          src={version.video}
+                          className="w-24 h-16 object-cover rounded border border-white/20"
+                          controls
+                        />
+                      ) : null}
                     </div>
 
                     {/* Version Details */}
