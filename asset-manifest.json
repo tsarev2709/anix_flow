@@ -1,13 +1,13 @@
 {
   "files": {
-    "main.css": "/anix_flow/static/css/main.20590d07.css",
-    "main.js": "/anix_flow/static/js/main.cb47241e.js",
+    "main.css": "/anix_flow/static/css/main.4d294359.css",
+    "main.js": "/anix_flow/static/js/main.2af6a2de.js",
     "index.html": "/anix_flow/index.html",
-    "main.20590d07.css.map": "/anix_flow/static/css/main.20590d07.css.map",
-    "main.cb47241e.js.map": "/anix_flow/static/js/main.cb47241e.js.map"
+    "main.4d294359.css.map": "/anix_flow/static/css/main.4d294359.css.map",
+    "main.2af6a2de.js.map": "/anix_flow/static/js/main.2af6a2de.js.map"
   },
   "entrypoints": [
-    "static/css/main.20590d07.css",
-    "static/js/main.cb47241e.js"
+    "static/css/main.4d294359.css",
+    "static/js/main.2af6a2de.js"
   ]
 }
