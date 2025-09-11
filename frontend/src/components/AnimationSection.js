@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Play, Plus, RotateCcw, Send, Download, History, Edit, MessageSquare, RefreshCw, ArrowUp, Trash2 } from 'lucide-react';
+import { Play, Plus, RotateCcw, Send, Download, History, Edit, MessageSquare, RefreshCw, ArrowUp, Trash2, Paperclip, X } from 'lucide-react';
 import { Button } from './ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Badge } from './ui/badge';
@@ -18,6 +18,7 @@ const AnimationSection = ({ setActiveTab }) => {
   const [renderProgress, setRenderProgress] = useState(0);
   const [selectedKeyframe, setSelectedKeyframe] = useState(null);
   const [modifyPrompt, setModifyPrompt] = useState('');
+  const [modifyImages, setModifyImages] = useState([]);
   const [historyKeyframeId, setHistoryKeyframeId] = useState(null);
   const [imageResolution, setImageResolution] = useState('');
 
@@ -63,11 +64,27 @@ const AnimationSection = ({ setActiveTab }) => {
     setImageResolution('');
   };
 
+  const handleModifyImageUpload = (e) => {
+    const files = Array.from(e.target.files);
+    files.forEach(file => {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setModifyImages(prev => [...prev, reader.result]);
+      };
+      reader.readAsDataURL(file);
+    });
+    e.target.value = '';
+  };
+
+  const handleRemoveModifyImage = (index) => {
+    setModifyImages(prev => prev.filter((_, i) => i !== index));
+  };
+
   const handleModifyKeyframeWithPrompt = async (sceneId, keyframeId) => {
-    if (!modifyPrompt.trim()) {
+    if (!modifyPrompt.trim() && modifyImages.length === 0) {
       toast({
-        title: "Prompt Required",
-        description: "Please enter a modification prompt.",
+        title: "Input Required",
+        description: "Please enter a modification prompt or upload an image.",
         variant: "destructive"
       });
       return;
@@ -84,27 +101,33 @@ const AnimationSection = ({ setActiveTab }) => {
             ...scene,
             keyframes: scene.keyframes.map(keyframe => {
               if (keyframe.id === keyframeId) {
-                // For demo, choose style based on prompt keywords
+                let newImage = keyframe.image;
                 let newStyle = 'realistic';
-                if (modifyPrompt.toLowerCase().includes('night') || modifyPrompt.toLowerCase().includes('dark')) {
-                  newStyle = 'cinematic';
-                } else if (modifyPrompt.toLowerCase().includes('art') || modifyPrompt.toLowerCase().includes('paint')) {
-                  newStyle = 'artistic';
+
+                if (modifyImages.length > 0) {
+                  newImage = modifyImages[0];
+                  newStyle = 'uploaded';
                 } else {
-                  const styles = Object.keys(IMAGE_PRESETS);
-                  newStyle = styles[Math.floor(Math.random() * styles.length)];
+                  // For demo, choose style based on prompt keywords
+                  if (modifyPrompt.toLowerCase().includes('night') || modifyPrompt.toLowerCase().includes('dark')) {
+                    newStyle = 'cinematic';
+                  } else if (modifyPrompt.toLowerCase().includes('art') || modifyPrompt.toLowerCase().includes('paint')) {
+                    newStyle = 'artistic';
+                  } else {
+                    const styles = Object.keys(IMAGE_PRESETS);
+                    newStyle = styles[Math.floor(Math.random() * styles.length)];
+                  }
+                  newImage = IMAGE_PRESETS[newStyle][sceneId] || keyframe.image;
                 }
-                
-                const newImage = IMAGE_PRESETS[newStyle][sceneId] || keyframe.image;
-                
+
                 const newHistoryEntry = {
                   id: `keyframe_history_${Date.now()}`,
                   image: newImage,
                   timestamp: new Date().toISOString(),
                   style: newStyle,
-                  prompt: modifyPrompt
+                  prompt: modifyPrompt || null
                 };
-                
+
                 return {
                   ...keyframe,
                   image: newImage,
@@ -123,10 +146,11 @@ const AnimationSection = ({ setActiveTab }) => {
     updateProject(updatedProject);
     setIsProcessing(false);
     setModifyPrompt('');
+    setModifyImages([]);
 
     toast({
       title: "Keyframe Modified",
-      description: `Keyframe updated based on prompt: "${modifyPrompt}"`,
+      description: modifyPrompt ? `Keyframe updated based on prompt: "${modifyPrompt}"` : "Keyframe updated with uploaded image",
     });
   };
 
@@ -604,17 +628,33 @@ const AnimationSection = ({ setActiveTab }) => {
               </div>
               <div className="flex items-center space-x-2">
                 <MessageSquare className="h-4 w-4 text-blue-400" />
-                <Input
-                  value={modifyPrompt}
-                  onChange={(e) => setModifyPrompt(e.target.value)}
-                  placeholder="Enter modification prompt..."
-                  className="bg-white/5 border-white/20 text-white placeholder-gray-500 flex-1"
-                  onKeyPress={(e) => {
-                    if (e.key === 'Enter') {
-                      handleModifyKeyframeWithPrompt(selectedKeyframe.sceneId, selectedKeyframe.keyframeId);
-                    }
-                  }}
-                />
+                <div className="relative flex-1">
+                  <Input
+                    value={modifyPrompt}
+                    onChange={(e) => setModifyPrompt(e.target.value)}
+                    placeholder="Enter modification prompt..."
+                    className="bg-white/5 border-white/20 text-white placeholder-gray-500 w-full pr-8"
+                    onKeyPress={(e) => {
+                      if (e.key === 'Enter') {
+                        handleModifyKeyframeWithPrompt(selectedKeyframe.sceneId, selectedKeyframe.keyframeId);
+                      }
+                    }}
+                  />
+                  <label
+                    htmlFor="modify-image-upload"
+                    className="absolute right-2 top-1/2 -translate-y-1/2 cursor-pointer text-gray-400 hover:text-gray-200"
+                  >
+                    <Paperclip className="h-4 w-4" />
+                  </label>
+                  <input
+                    id="modify-image-upload"
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    onChange={handleModifyImageUpload}
+                    className="hidden"
+                  />
+                </div>
                 <Button
                   size="sm"
                   onClick={() => handleModifyKeyframeWithPrompt(selectedKeyframe.sceneId, selectedKeyframe.keyframeId)}
@@ -624,6 +664,26 @@ const AnimationSection = ({ setActiveTab }) => {
                   Apply
                 </Button>
               </div>
+              {modifyImages.length > 0 && (
+                <div className="flex space-x-2 mt-2">
+                  {modifyImages.map((img, idx) => (
+                    <div key={idx} className="relative">
+                      <img
+                        src={img}
+                        alt={`preview-${idx}`}
+                        className="h-12 w-12 object-cover rounded border border-white/20"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveModifyImage(idx)}
+                        className="absolute -top-1 -right-1 bg-black/60 rounded-full p-0.5 text-white"
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
         </DialogContent>
