@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Image as ImageIcon, Wand2, RefreshCw, Send, Download, History, ArrowUp, Edit, MessageSquare } from 'lucide-react';
+import { Image as ImageIcon, Wand2, RefreshCw, Send, Download, History, ArrowUp, Edit, MessageSquare, Paperclip, X } from 'lucide-react';
 import { Button } from './ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
@@ -18,6 +18,7 @@ const StoryboardSection = ({ setActiveTab }) => {
   const [selectedStyle, setSelectedStyle] = useState('realistic');
   const [modifyingSceneId, setModifyingSceneId] = useState(null);
   const [modifyPrompt, setModifyPrompt] = useState('');
+  const [modifyImages, setModifyImages] = useState([]);
   const [historySceneId, setHistorySceneId] = useState(null);
 
   const handleGenerateImages = async () => {
@@ -111,11 +112,27 @@ const StoryboardSection = ({ setActiveTab }) => {
     });
   };
 
+  const handleModifyImageUpload = (e) => {
+    const files = Array.from(e.target.files);
+    files.forEach(file => {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setModifyImages(prev => [...prev, reader.result]);
+      };
+      reader.readAsDataURL(file);
+    });
+    e.target.value = '';
+  };
+
+  const handleRemoveModifyImage = (index) => {
+    setModifyImages(prev => prev.filter((_, i) => i !== index));
+  };
+
   const handleModifyWithPrompt = async (sceneId) => {
-    if (!modifyPrompt.trim()) {
+    if (!modifyPrompt.trim() && modifyImages.length === 0) {
       toast({
-        title: "Prompt Required",
-        description: "Please enter a modification prompt.",
+        title: "Input Required",
+        description: "Please enter a modification prompt or upload an image.",
         variant: "destructive"
       });
       return;
@@ -126,30 +143,35 @@ const StoryboardSection = ({ setActiveTab }) => {
 
     const scenes = currentProject.storyboard.scenes.map(scene => {
       if (scene.id === sceneId) {
-        // For demo, use a different preset based on prompt keywords
         let newStyle = scene.style;
-        if (modifyPrompt.toLowerCase().includes('night') || modifyPrompt.toLowerCase().includes('dark')) {
-          newStyle = 'cinematic';
-        } else if (modifyPrompt.toLowerCase().includes('art') || modifyPrompt.toLowerCase().includes('paint')) {
-          newStyle = 'artistic';
+        let newImage = scene.image;
+
+        if (modifyImages.length > 0) {
+          newImage = modifyImages[0];
+          newStyle = 'uploaded';
         } else {
-          // Just cycle to next style
-          const styles = Object.keys(IMAGE_PRESETS);
-          const currentIndex = styles.indexOf(scene.style);
-          newStyle = styles[(currentIndex + 1) % styles.length];
+          // For demo, use a different preset based on prompt keywords
+          if (modifyPrompt.toLowerCase().includes('night') || modifyPrompt.toLowerCase().includes('dark')) {
+            newStyle = 'cinematic';
+          } else if (modifyPrompt.toLowerCase().includes('art') || modifyPrompt.toLowerCase().includes('paint')) {
+            newStyle = 'artistic';
+          } else {
+            const styles = Object.keys(IMAGE_PRESETS);
+            const currentIndex = styles.indexOf(scene.style);
+            newStyle = styles[(currentIndex + 1) % styles.length];
+          }
+
+          newImage = IMAGE_PRESETS[newStyle][sceneId];
         }
-        
-        const newImage = IMAGE_PRESETS[newStyle][sceneId];
-        
-        // Add to history
+
         const newHistoryEntry = {
           id: `${sceneId}_${Date.now()}`,
           image: newImage,
           timestamp: new Date().toISOString(),
           style: newStyle,
-          prompt: modifyPrompt
+          prompt: modifyPrompt || null
         };
-        
+
         return {
           ...scene,
           image: newImage,
@@ -169,10 +191,11 @@ const StoryboardSection = ({ setActiveTab }) => {
     setIsGenerating(false);
     setModifyingSceneId(null);
     setModifyPrompt('');
+    setModifyImages([]);
 
     toast({
       title: "Image Modified",
-      description: `Image updated based on prompt: "${modifyPrompt}"`,
+      description: modifyPrompt ? `Image updated based on prompt: "${modifyPrompt}"` : "Image updated with uploaded image",
     });
   };
 
@@ -386,7 +409,11 @@ const StoryboardSection = ({ setActiveTab }) => {
                         <Button
                           size="sm"
                           variant="outline"
-                          onClick={() => setModifyingSceneId(scene.id)}
+                          onClick={() => {
+                            setModifyingSceneId(scene.id);
+                            setModifyPrompt('');
+                            setModifyImages([]);
+                          }}
                           disabled={isGenerating}
                           className="border-blue-500/30 text-blue-300 hover:bg-blue-500/10"
                         >
@@ -437,25 +464,41 @@ const StoryboardSection = ({ setActiveTab }) => {
                       </div>
                     </div>
 
-                    {/* Modify Prompt Input */}
+                    {/* Modify Prompt/Image Input */}
                     {modifyingSceneId === scene.id && (
                       <div className="mt-4 p-4 bg-white/5 rounded-lg border border-blue-500/30">
                         <div className="flex items-center space-x-2 mb-2">
                           <MessageSquare className="h-4 w-4 text-blue-400" />
-                          <span className="text-blue-300 text-sm font-medium">Modify with Prompt</span>
+                          <span className="text-blue-300 text-sm font-medium">Modify with Prompt or Image</span>
                         </div>
                         <div className="flex space-x-2">
-                          <Input
-                            value={modifyPrompt}
-                            onChange={(e) => setModifyPrompt(e.target.value)}
-                            placeholder="e.g., make it night time, remove background..."
-                            className="bg-white/5 border-white/20 text-white placeholder-gray-500 flex-1"
-                            onKeyPress={(e) => {
-                              if (e.key === 'Enter') {
-                                handleModifyWithPrompt(scene.id);
-                              }
-                            }}
-                          />
+                          <div className="relative flex-1">
+                            <Input
+                              value={modifyPrompt}
+                              onChange={(e) => setModifyPrompt(e.target.value)}
+                              placeholder="e.g., make it night time, remove background..."
+                              className="bg-white/5 border-white/20 text-white placeholder-gray-500 w-full pr-8"
+                              onKeyPress={(e) => {
+                                if (e.key === 'Enter') {
+                                  handleModifyWithPrompt(scene.id);
+                                }
+                              }}
+                            />
+                            <label
+                              htmlFor={`modify-image-upload-${scene.id}`}
+                              className="absolute right-2 top-1/2 -translate-y-1/2 cursor-pointer text-gray-400 hover:text-gray-200"
+                            >
+                              <Paperclip className="h-4 w-4" />
+                            </label>
+                            <input
+                              id={`modify-image-upload-${scene.id}`}
+                              type="file"
+                              accept="image/*"
+                              multiple
+                              onChange={handleModifyImageUpload}
+                              className="hidden"
+                            />
+                          </div>
                           <Button
                             size="sm"
                             onClick={() => handleModifyWithPrompt(scene.id)}
@@ -470,12 +513,33 @@ const StoryboardSection = ({ setActiveTab }) => {
                             onClick={() => {
                               setModifyingSceneId(null);
                               setModifyPrompt('');
+                              setModifyImages([]);
                             }}
                             className="border-white/20 text-white hover:bg-white/10"
                           >
                             Cancel
                           </Button>
                         </div>
+                        {modifyImages.length > 0 && (
+                          <div className="flex space-x-2 mt-2">
+                            {modifyImages.map((img, idx) => (
+                              <div key={idx} className="relative">
+                                <img
+                                  src={img}
+                                  alt={`preview-${idx}`}
+                                  className="h-12 w-12 object-cover rounded border border-white/20"
+                                />
+                                <button
+                                  type="button"
+                                  onClick={() => handleRemoveModifyImage(idx)}
+                                  className="absolute -top-1 -right-1 bg-black/60 rounded-full p-0.5 text-white"
+                                >
+                                  <X className="h-3 w-3" />
+                                </button>
+                              </div>
+                            ))}
+                          </div>
+                        )}
                       </div>
                     )}
                   </CardContent>
