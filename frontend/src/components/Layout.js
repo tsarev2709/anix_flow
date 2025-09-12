@@ -13,14 +13,15 @@ const Layout = ({ children, activeTab, setActiveTab }) => {
   const { logout } = useAuth();
   const { projects, currentProject, setCurrentProject } = useProject();
 
-  const [musicEnabled, setMusicEnabled] = useState(false);
-  const [musicVolume, setMusicVolume] = useState([50]);
+  const [musicEnabled, setMusicEnabled] = useState(true);
+  const [musicVolume, setMusicVolume] = useState([10]);
   const audioRef = useRef(null);
 
   useEffect(() => {
     audioRef.current = new Audio('/audio/bg-music.mp3');
     audioRef.current.loop = true;
     audioRef.current.volume = musicVolume[0] / 100;
+    handleMusicToggle(true);
     return () => {
       audioRef.current && audioRef.current.pause();
     };
@@ -31,14 +32,17 @@ const Layout = ({ children, activeTab, setActiveTab }) => {
     audioRef.current.volume = musicVolume[0] / 100;
   }, [musicVolume]);
 
-  useEffect(() => {
+  const handleMusicToggle = (enabled) => {
+    setMusicEnabled(enabled);
     if (!audioRef.current) return;
-    if (musicEnabled) {
-      audioRef.current.play();
+    if (enabled) {
+      audioRef.current.play().catch((err) => {
+        console.warn('Failed to play background music:', err);
+      });
     } else {
       audioRef.current.pause();
     }
-  }, [musicEnabled]);
+  };
 
   const tabs = [
     { id: 'dashboard', label: 'Мои проекты', icon: Home },
@@ -117,7 +121,7 @@ const Layout = ({ children, activeTab, setActiveTab }) => {
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <Label htmlFor="bg-music" className="text-sm">Фоновая музыка</Label>
-                  <Switch id="bg-music" checked={musicEnabled} onCheckedChange={setMusicEnabled} />
+                  <Switch id="bg-music" checked={musicEnabled} onCheckedChange={handleMusicToggle} />
                 </div>
                 <div className="space-y-2">
                   <Label className="text-sm">Громкость</Label>
