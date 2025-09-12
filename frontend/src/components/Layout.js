@@ -13,14 +13,15 @@ const Layout = ({ children, activeTab, setActiveTab }) => {
   const { logout } = useAuth();
   const { projects, currentProject, setCurrentProject } = useProject();
 
-  const [musicEnabled, setMusicEnabled] = useState(false);
-  const [musicVolume, setMusicVolume] = useState([50]);
+  const [musicEnabled, setMusicEnabled] = useState(true);
+  const [musicVolume, setMusicVolume] = useState([10]);
   const audioRef = useRef(null);
 
   useEffect(() => {
     audioRef.current = new Audio('/audio/bg-music.mp3');
     audioRef.current.loop = true;
     audioRef.current.volume = musicVolume[0] / 100;
+    handleMusicToggle(true);
     return () => {
       audioRef.current && audioRef.current.pause();
     };
