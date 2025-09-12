@@ -648,7 +648,8 @@ const AnimationSection = ({ setActiveTab }) => {
                     </div>
                   )}
                 </div>
-              ))}
+                );
+              })}
 
               {/* Render Progress */}
               {isProcessing && (
