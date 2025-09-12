@@ -12,6 +12,25 @@ import { useToast } from '../hooks/use-toast';
 import { IMAGE_PRESETS } from '../mock';
 import VersionHistoryModal from './VersionHistoryModal';
 
+const DEFAULT_FILTERS = {
+  brightness: 100,
+  contrast: 100,
+  saturation: 100,
+  hue: 0,
+  sepia: 0,
+  blur: 0,
+  grayscale: 0,
+  invert: 0
+};
+
+const FILTER_PRESETS = {
+  None: { ...DEFAULT_FILTERS },
+  Vintage: { brightness: 110, contrast: 90, saturation: 120, hue: 20, sepia: 30, blur: 0, grayscale: 0, invert: 0 },
+  'Black & White': { brightness: 100, contrast: 105, saturation: 0, hue: 0, sepia: 0, blur: 0, grayscale: 100, invert: 0 },
+  Cool: { brightness: 100, contrast: 110, saturation: 120, hue: 180, sepia: 0, blur: 0, grayscale: 0, invert: 0 },
+  Warm: { brightness: 110, contrast: 100, saturation: 130, hue: 40, sepia: 10, blur: 0, grayscale: 0, invert: 0 }
+};
+
 const AnimationSection = ({ setActiveTab }) => {
   const { currentProject, updateProject } = useProject();
   const { toast } = useToast();
@@ -29,8 +48,29 @@ const AnimationSection = ({ setActiveTab }) => {
   const [segments, setSegments] = useState([]);
   const [dragIndex, setDragIndex] = useState(null);
   const [currentTime, setCurrentTime] = useState(0);
-  const [videoFilters, setVideoFilters] = useState({ brightness: 100, contrast: 100, saturation: 100 });
+  const [videoFilters, setVideoFilters] = useState({ ...DEFAULT_FILTERS });
+  const [presetName, setPresetName] = useState('None');
+  const [customPresets, setCustomPresets] = useState({});
+  const [newPresetName, setNewPresetName] = useState('');
   const videoRef = useRef(null);
+
+  const applyPreset = (name) => {
+    const preset = FILTER_PRESETS[name] || customPresets[name] || DEFAULT_FILTERS;
+    setPresetName(name);
+    setVideoFilters({ ...preset });
+  };
+
+  const savePreset = () => {
+    if (!newPresetName.trim()) return;
+    setCustomPresets(prev => ({ ...prev, [newPresetName]: { ...videoFilters } }));
+    setPresetName(newPresetName);
+    setNewPresetName('');
+  };
+
+  const handleFilterChange = (key, value) => {
+    setVideoFilters(prev => ({ ...prev, [key]: value }));
+    setPresetName('Custom');
+  };
 
   const handleAddKeyframe = (sceneId) => {
     const updatedAnimation = {
@@ -495,7 +535,8 @@ const AnimationSection = ({ setActiveTab }) => {
 
     setEditSceneId(null);
     setSegments([]);
-    setVideoFilters({ brightness: 100, contrast: 100, saturation: 100 });
+    setVideoFilters({ ...DEFAULT_FILTERS });
+    setPresetName('None');
     setCurrentTime(0);
   };
 
@@ -806,7 +847,8 @@ const AnimationSection = ({ setActiveTab }) => {
           if (!open) {
             setEditSceneId(null);
             setSegments([]);
-            setVideoFilters({ brightness: 100, contrast: 100, saturation: 100 });
+            setVideoFilters({ ...DEFAULT_FILTERS });
+            setPresetName('None');
             setCurrentTime(0);
           }
         }}
@@ -825,7 +867,7 @@ const AnimationSection = ({ setActiveTab }) => {
                 src={editScene.videoUrl}
                 controls
                 className="w-full h-64 object-cover rounded border border-green-400/50"
-                style={{ filter: `brightness(${videoFilters.brightness}%) contrast(${videoFilters.contrast}%) saturate(${videoFilters.saturation}%)` }}
+                style={{ filter: `brightness(${videoFilters.brightness}%) contrast(${videoFilters.contrast}%) saturate(${videoFilters.saturation}%) hue-rotate(${videoFilters.hue}deg) sepia(${videoFilters.sepia}%) blur(${videoFilters.blur}px) grayscale(${videoFilters.grayscale}%) invert(${videoFilters.invert}%)` }}
                 onLoadedMetadata={(e) => {
                   setImageResolution(`${e.target.videoWidth}x${e.target.videoHeight}`);
                   if (!segments.length) {
@@ -866,13 +908,42 @@ const AnimationSection = ({ setActiveTab }) => {
                 </Button>
               </div>
               <div className="space-y-2">
+                <label className="text-sm text-gray-300">Filter Preset</label>
+                <select
+                  value={presetName}
+                  onChange={(e) => applyPreset(e.target.value)}
+                  className="w-full bg-black/20 text-white p-2 rounded"
+                >
+                  {Object.keys(FILTER_PRESETS).map(name => (
+                    <option key={name} value={name}>{name}</option>
+                  ))}
+                  {Object.keys(customPresets).map(name => (
+                    <option key={name} value={name}>{name}</option>
+                  ))}
+                  <option value="Custom">Custom</option>
+                </select>
+                <div className="flex space-x-2">
+                  <Input
+                    value={newPresetName}
+                    onChange={(e) => setNewPresetName(e.target.value)}
+                    placeholder="Preset name"
+                    className="bg-black/20 text-white"
+                  />
+                  <Button
+                    size="sm"
+                    onClick={savePreset}
+                    className="bg-green-500/20 hover:bg-green-500/30 text-green-300 border border-green-500/30"
+                  >
+                    Save
+                  </Button>
+                </div>
                 <label className="text-sm text-gray-300">Brightness</label>
                 <input
                   type="range"
                   min="0"
                   max="200"
                   value={videoFilters.brightness}
-                  onChange={(e) => setVideoFilters({ ...videoFilters, brightness: Number(e.target.value) })}
+                  onChange={(e) => handleFilterChange('brightness', Number(e.target.value))}
                   className="w-full"
                 />
                 <label className="text-sm text-gray-300">Contrast</label>
@@ -881,7 +952,7 @@ const AnimationSection = ({ setActiveTab }) => {
                   min="0"
                   max="200"
                   value={videoFilters.contrast}
-                  onChange={(e) => setVideoFilters({ ...videoFilters, contrast: Number(e.target.value) })}
+                  onChange={(e) => handleFilterChange('contrast', Number(e.target.value))}
                   className="w-full"
                 />
                 <label className="text-sm text-gray-300">Saturation</label>
@@ -890,7 +961,52 @@ const AnimationSection = ({ setActiveTab }) => {
                   min="0"
                   max="200"
                   value={videoFilters.saturation}
-                  onChange={(e) => setVideoFilters({ ...videoFilters, saturation: Number(e.target.value) })}
+                  onChange={(e) => handleFilterChange('saturation', Number(e.target.value))}
+                  className="w-full"
+                />
+                <label className="text-sm text-gray-300">Hue</label>
+                <input
+                  type="range"
+                  min="0"
+                  max="360"
+                  value={videoFilters.hue}
+                  onChange={(e) => handleFilterChange('hue', Number(e.target.value))}
+                  className="w-full"
+                />
+                <label className="text-sm text-gray-300">Sepia</label>
+                <input
+                  type="range"
+                  min="0"
+                  max="100"
+                  value={videoFilters.sepia}
+                  onChange={(e) => handleFilterChange('sepia', Number(e.target.value))}
+                  className="w-full"
+                />
+                <label className="text-sm text-gray-300">Blur</label>
+                <input
+                  type="range"
+                  min="0"
+                  max="10"
+                  value={videoFilters.blur}
+                  onChange={(e) => handleFilterChange('blur', Number(e.target.value))}
+                  className="w-full"
+                />
+                <label className="text-sm text-gray-300">Grayscale</label>
+                <input
+                  type="range"
+                  min="0"
+                  max="100"
+                  value={videoFilters.grayscale}
+                  onChange={(e) => handleFilterChange('grayscale', Number(e.target.value))}
+                  className="w-full"
+                />
+                <label className="text-sm text-gray-300">Invert</label>
+                <input
+                  type="range"
+                  min="0"
+                  max="100"
+                  value={videoFilters.invert}
+                  onChange={(e) => handleFilterChange('invert', Number(e.target.value))}
                   className="w-full"
                 />
               </div>
@@ -900,7 +1016,8 @@ const AnimationSection = ({ setActiveTab }) => {
                   onClick={() => {
                     setEditSceneId(null);
                     setSegments([]);
-                    setVideoFilters({ brightness: 100, contrast: 100, saturation: 100 });
+                    setVideoFilters({ ...DEFAULT_FILTERS });
+                    setPresetName('None');
                     setCurrentTime(0);
                   }}
                   className="border-white/20 text-white hover:bg-white/10"
