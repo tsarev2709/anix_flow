@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Play, Plus, RotateCcw, Send, Download, History, Edit, MessageSquare, RefreshCw, ArrowUp, Trash2, Paperclip, X } from 'lucide-react';
 import { Button } from './ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
@@ -7,10 +7,32 @@ import { Progress } from './ui/progress';
 import { Input } from './ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
 import { Switch } from './ui/switch';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from './ui/accordion';
+import { ScrollArea } from './ui/scroll-area';
 import { useProject } from '../contexts/ProjectContext';
 import { useToast } from '../hooks/use-toast';
 import { IMAGE_PRESETS } from '../mock';
 import VersionHistoryModal from './VersionHistoryModal';
+
+const DEFAULT_FILTERS = {
+  brightness: 100,
+  contrast: 100,
+  saturation: 100,
+  hue: 0,
+  sepia: 0,
+  blur: 0,
+  grayscale: 0,
+  invert: 0
+};
+
+const FILTER_PRESETS = {
+  None: { ...DEFAULT_FILTERS },
+  Vintage: { brightness: 110, contrast: 90, saturation: 120, hue: 20, sepia: 30, blur: 0, grayscale: 0, invert: 0 },
+  'Black & White': { brightness: 100, contrast: 105, saturation: 0, hue: 0, sepia: 0, blur: 0, grayscale: 100, invert: 0 },
+  Cool: { brightness: 100, contrast: 110, saturation: 120, hue: 180, sepia: 0, blur: 0, grayscale: 0, invert: 0 },
+  Warm: { brightness: 110, contrast: 100, saturation: 130, hue: 40, sepia: 10, blur: 0, grayscale: 0, invert: 0 }
+};
 
 const AnimationSection = ({ setActiveTab }) => {
   const { currentProject, updateProject } = useProject();
@@ -26,8 +48,31 @@ const AnimationSection = ({ setActiveTab }) => {
   const [goLivePrompt, setGoLivePrompt] = useState('');
   const [previewUrl, setPreviewUrl] = useState(null);
   const [editSceneId, setEditSceneId] = useState(null);
-  const [trimStart, setTrimStart] = useState('');
-  const [trimEnd, setTrimEnd] = useState('');
+  const [segments, setSegments] = useState([]);
+  const [dragIndex, setDragIndex] = useState(null);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [videoFilters, setVideoFilters] = useState({ ...DEFAULT_FILTERS });
+  const [presetName, setPresetName] = useState('None');
+  const [customPresets, setCustomPresets] = useState({});
+  const [newPresetName, setNewPresetName] = useState('');
+  const videoRef = useRef(null);
+
+  const applyPreset = (name) => {
+    const preset = FILTER_PRESETS[name] || customPresets[name] || DEFAULT_FILTERS;
+    setPresetName(name);
+    setVideoFilters({ ...preset });
+  };
+
+  const savePreset = () => {
+    if (!newPresetName.trim()) return;
+    setCustomPresets(prev => ({ ...prev, [newPresetName]: { ...videoFilters } }));
+    setPresetName(newPresetName);
+    setNewPresetName('');
+  };
+
+  const handleFilterChange = (key, value) => {
+    setVideoFilters(prev => ({ ...prev, [key]: value }));
+  };
 
   const handleAddKeyframe = (sceneId) => {
     const updatedAnimation = {
@@ -444,17 +489,39 @@ const AnimationSection = ({ setActiveTab }) => {
     });
     setActiveTab('sound');
   };
+  const handleCutSegment = () => {
+    const time = currentTime;
+    setSegments(prev => {
+      const index = prev.findIndex(seg => time > seg.start && time < seg.end);
+      if (index === -1) return prev;
+      const seg = prev[index];
+      const newSeg1 = { ...seg, id: `${seg.id}_a`, end: time };
+      const newSeg2 = { ...seg, id: `${seg.id}_b`, start: time };
+      return [...prev.slice(0, index), newSeg1, newSeg2, ...prev.slice(index + 1)];
+    });
+  };
 
-  const handleTrimApply = () => {
-    const start = parseFloat(trimStart) || 0;
-    const end = parseFloat(trimEnd) || 0;
+  const handleDeleteSegment = (index) => {
+    setSegments(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const handleDrop = (index) => {
+    setSegments(prev => {
+      if (dragIndex === null) return prev;
+      const newSegs = [...prev];
+      const [moved] = newSegs.splice(dragIndex, 1);
+      newSegs.splice(index, 0, moved);
+      return newSegs;
+    });
+    setDragIndex(null);
+  };
+
+  const handleEditApply = () => {
     const updatedAnimation = {
       ...currentProject.animation,
       scenes: currentProject.animation.scenes.map(scene => {
         if (scene.id === editSceneId) {
-          const baseUrl = scene.videoUrl ? scene.videoUrl.split('#')[0] : '';
-          const newUrl = baseUrl ? `${baseUrl}#t=${start},${end}` : baseUrl;
-          return { ...scene, videoUrl: newUrl };
+          return { ...scene, segments, filters: videoFilters };
         }
         return scene;
       })
@@ -464,13 +531,15 @@ const AnimationSection = ({ setActiveTab }) => {
     updateProject(updatedProject);
 
     toast({
-      title: "Video Trimmed",
-      description: `Applied trim from ${start}s to ${end}s.`,
+      title: "Video Edited",
+      description: "Timeline and color settings applied.",
     });
 
     setEditSceneId(null);
-    setTrimStart('');
-    setTrimEnd('');
+    setSegments([]);
+    setVideoFilters({ ...DEFAULT_FILTERS });
+    setPresetName('None');
+    setCurrentTime(0);
   };
 
   // Initialize animation scenes from storyboard if not exists
@@ -690,10 +759,10 @@ const AnimationSection = ({ setActiveTab }) => {
                             size="sm"
                             variant="outline"
                             onClick={() => {
-                              const range = scene.videoUrl?.split('#t=')[1]?.split(',') || [];
-                              setTrimStart(range[0] || '');
-                              setTrimEnd(range[1] || '');
                               setEditSceneId(scene.id);
+                              setSegments(scene.segments || []);
+                              setVideoFilters(scene.filters || { brightness: 100, contrast: 100, saturation: 100 });
+                              setCurrentTime(0);
                             }}
                             className="border-green-500/30 text-green-300"
                           >
@@ -779,66 +848,217 @@ const AnimationSection = ({ setActiveTab }) => {
         onOpenChange={(open) => {
           if (!open) {
             setEditSceneId(null);
-            setTrimStart('');
-            setTrimEnd('');
+            setSegments([]);
+            setVideoFilters({ ...DEFAULT_FILTERS });
+            setPresetName('None');
+            setCurrentTime(0);
           }
         }}
       >
-        <DialogContent className="bg-[#161616]/60 backdrop-blur-xl border-white/20 max-w-3xl">
-          <DialogHeader>
-            <DialogTitle className="text-white flex items-center">
-              <Edit className="h-5 w-5 mr-2 text-green-400" />
-              Edit Video
-            </DialogTitle>
-          </DialogHeader>
-          {editScene && (
-            <div className="space-y-4">
-              <video
-                src={editScene.videoUrl}
-                controls
-                className="w-full h-64 object-cover rounded border border-green-400/50"
-              />
-              <div className="flex space-x-4">
-                <div className="flex-1 space-y-1">
-                  <label className="text-sm text-gray-300">Start (s)</label>
-                  <Input
-                    type="number"
-                    value={trimStart}
-                    onChange={(e) => setTrimStart(e.target.value)}
-                    className="bg-white/5 border-white/20 text-white"
-                  />
-                </div>
-                <div className="flex-1 space-y-1">
-                  <label className="text-sm text-gray-300">End (s)</label>
-                  <Input
-                    type="number"
-                    value={trimEnd}
-                    onChange={(e) => setTrimEnd(e.target.value)}
-                    className="bg-white/5 border-white/20 text-white"
-                  />
-                </div>
-              </div>
-              <div className="flex justify-end space-x-2">
-                <Button
-                  variant="outline"
-                  onClick={() => {
-                    setEditSceneId(null);
-                    setTrimStart('');
-                    setTrimEnd('');
+        <DialogContent className="bg-[#161616]/60 backdrop-blur-xl border-white/20 max-w-3xl p-0">
+          <ScrollArea className="max-h-[80vh] p-6">
+            <DialogHeader>
+              <DialogTitle className="text-white flex items-center">
+                <Edit className="h-5 w-5 mr-2 text-green-400" />
+                Edit Video
+              </DialogTitle>
+            </DialogHeader>
+            {editScene && (
+              <div className="space-y-4">
+                <video
+                  ref={videoRef}
+                  src={editScene.videoUrl}
+                  controls
+                  className="w-full h-64 object-cover rounded border border-green-400/50"
+                  style={{ filter: `brightness(${videoFilters.brightness}%) contrast(${videoFilters.contrast}%) saturate(${videoFilters.saturation}%) hue-rotate(${videoFilters.hue}deg) sepia(${videoFilters.sepia}%) blur(${videoFilters.blur}px) grayscale(${videoFilters.grayscale}%) invert(${videoFilters.invert}%)` }}
+                  onLoadedMetadata={(e) => {
+                    setImageResolution(`${e.target.videoWidth}x${e.target.videoHeight}`);
+                    if (!segments.length) {
+                      setSegments([{ id: `seg_${Date.now()}`, start: 0, end: e.target.duration }]);
+                    }
                   }}
-                  className="border-white/20 text-white hover:bg-white/10"
-                >
-                  Cancel
-                </Button>
-                <Button
-                  onClick={handleTrimApply}
-                  className="bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 border border-purple-500/30"
-                >
-                  Apply Trim
-                </Button>
+                  onTimeUpdate={(e) => setCurrentTime(e.target.currentTime)}
+                />
+                <div className="text-right text-sm text-gray-400">{imageResolution}</div>
+                <div className="space-y-2">
+                  <div className="flex items-center flex-wrap gap-2">
+                    {segments.map((seg, idx) => (
+                      <div
+                        key={seg.id}
+                        draggable
+                        onDragStart={() => setDragIndex(idx)}
+                        onDrop={() => handleDrop(idx)}
+                        onDragOver={(e) => e.preventDefault()}
+                        className="bg-white/10 text-white px-2 py-1 rounded relative cursor-move"
+                      >
+                        {seg.start.toFixed(1)}-{seg.end.toFixed(1)}s
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteSegment(idx)}
+                          className="absolute -top-1 -right-1 bg-black/60 rounded-full p-0.5 text-white"
+                        >
+                          <X className="h-3 w-3" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                  <Button
+                    size="sm"
+                    onClick={handleCutSegment}
+                    className="bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 border border-blue-500/30"
+                  >
+                    Cut at {currentTime.toFixed(1)}s
+                  </Button>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm text-gray-300">Filter Preset</label>
+                  <Select value={presetName} onValueChange={applyPreset}>
+                    <SelectTrigger className="bg-white/5 border-white/20 text-white">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent className="bg-[#161616] border-white/20 text-white">
+                      {Object.keys(FILTER_PRESETS).map(name => (
+                        <SelectItem key={name} value={name} className="text-white focus:bg-white/10">
+                          {name}
+                        </SelectItem>
+                      ))}
+                      {Object.keys(customPresets).map(name => (
+                        <SelectItem key={name} value={name} className="text-white focus:bg-white/10">
+                          {name}
+                        </SelectItem>
+                      ))}
+                      <SelectItem value="Custom" className="text-white focus:bg-white/10">
+                        Custom
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <label className="text-sm text-gray-300">Brightness</label>
+                  <input
+                    type="range"
+                    min="0"
+                    max="200"
+                    value={videoFilters.brightness}
+                    onChange={(e) => handleFilterChange('brightness', Number(e.target.value))}
+                    onInput={(e) => handleFilterChange('brightness', Number(e.target.value))}
+                    className="w-full"
+                  />
+                  <label className="text-sm text-gray-300">Contrast</label>
+                  <input
+                    type="range"
+                    min="0"
+                    max="200"
+                    value={videoFilters.contrast}
+                    onChange={(e) => handleFilterChange('contrast', Number(e.target.value))}
+                    onInput={(e) => handleFilterChange('contrast', Number(e.target.value))}
+                    className="w-full"
+                  />
+                  <label className="text-sm text-gray-300">Saturation</label>
+                  <input
+                    type="range"
+                    min="0"
+                    max="200"
+                    value={videoFilters.saturation}
+                    onChange={(e) => handleFilterChange('saturation', Number(e.target.value))}
+                    onInput={(e) => handleFilterChange('saturation', Number(e.target.value))}
+                    className="w-full"
+                  />
+                  <Accordion type="single" collapsible className="w-full text-white">
+                    <AccordionItem value="advanced">
+                      <AccordionTrigger className="text-sm">Advanced Settings</AccordionTrigger>
+                      <AccordionContent className="space-y-2">
+                        <div className="flex space-x-2">
+                          <Input
+                            value={newPresetName}
+                            onChange={(e) => setNewPresetName(e.target.value)}
+                            placeholder="Preset name"
+                            className="bg-black/20 text-white"
+                          />
+                          <Button
+                            size="sm"
+                            onClick={savePreset}
+                            className="bg-green-500/20 hover:bg-green-500/30 text-green-300 border border-green-500/30"
+                          >
+                            Save
+                          </Button>
+                        </div>
+                        <label className="text-sm text-gray-300">Hue</label>
+                        <input
+                          type="range"
+                          min="0"
+                          max="360"
+                          value={videoFilters.hue}
+                          onChange={(e) => handleFilterChange('hue', Number(e.target.value))}
+                          onInput={(e) => handleFilterChange('hue', Number(e.target.value))}
+                          className="w-full"
+                        />
+                        <label className="text-sm text-gray-300">Sepia</label>
+                        <input
+                          type="range"
+                          min="0"
+                          max="100"
+                          value={videoFilters.sepia}
+                          onChange={(e) => handleFilterChange('sepia', Number(e.target.value))}
+                          onInput={(e) => handleFilterChange('sepia', Number(e.target.value))}
+                          className="w-full"
+                        />
+                        <label className="text-sm text-gray-300">Blur</label>
+                        <input
+                          type="range"
+                          min="0"
+                          max="10"
+                          value={videoFilters.blur}
+                          onChange={(e) => handleFilterChange('blur', Number(e.target.value))}
+                          onInput={(e) => handleFilterChange('blur', Number(e.target.value))}
+                          className="w-full"
+                        />
+                        <label className="text-sm text-gray-300">Grayscale</label>
+                        <input
+                          type="range"
+                          min="0"
+                          max="100"
+                          value={videoFilters.grayscale}
+                          onChange={(e) => handleFilterChange('grayscale', Number(e.target.value))}
+                          onInput={(e) => handleFilterChange('grayscale', Number(e.target.value))}
+                          className="w-full"
+                        />
+                        <label className="text-sm text-gray-300">Invert</label>
+                        <input
+                          type="range"
+                          min="0"
+                          max="100"
+                          value={videoFilters.invert}
+                          onChange={(e) => handleFilterChange('invert', Number(e.target.value))}
+                          onInput={(e) => handleFilterChange('invert', Number(e.target.value))}
+                          className="w-full"
+                        />
+                      </AccordionContent>
+                    </AccordionItem>
+                  </Accordion>
+                </div>
+                <div className="flex justify-end space-x-2">
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setEditSceneId(null);
+                      setSegments([]);
+                      setVideoFilters({ ...DEFAULT_FILTERS });
+                      setPresetName('None');
+                      setCurrentTime(0);
+                    }}
+                    className="border-white/20 text-white hover:bg-white/10"
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    onClick={handleEditApply}
+                    className="bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 border border-purple-500/30"
+                  >
+                    Apply Edits
+                  </Button>
+                </div>
               </div>
-            </div>
-          )}
+            )}
+          </ScrollArea>
         </DialogContent>
       </Dialog>
 
