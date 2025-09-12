@@ -505,6 +505,7 @@ const AnimationSection = ({ setActiveTab }) => {
     setSegments(prev => prev.filter((_, i) => i !== index));
   };
 
+
   const handleDrop = (index) => {
     setSegments(prev => {
       if (dragIndex === null) return prev;
@@ -515,7 +516,7 @@ const AnimationSection = ({ setActiveTab }) => {
     });
     setDragIndex(null);
   };
-
+  
   const handleEditApply = () => {
     const updatedAnimation = {
       ...currentProject.animation,
@@ -1056,6 +1057,78 @@ const AnimationSection = ({ setActiveTab }) => {
                     Apply Edits
                   </Button>
                 </div>
+                <label className="text-sm text-gray-300">Brightness</label>
+                <input
+                  type="range"
+                  min="0"
+                  max="200"
+                  value={videoFilters.brightness}
+                  onChange={(e) => handleFilterChange('brightness', Number(e.target.value))}
+                  className="w-full"
+                />
+                <label className="text-sm text-gray-300">Contrast</label>
+                <input
+                  type="range"
+                  min="0"
+                  max="200"
+                  value={videoFilters.contrast}
+                  onChange={(e) => handleFilterChange('contrast', Number(e.target.value))}
+                  className="w-full"
+                />
+                <label className="text-sm text-gray-300">Saturation</label>
+                <input
+                  type="range"
+                  min="0"
+                  max="200"
+                  value={videoFilters.saturation}
+                  onChange={(e) => handleFilterChange('saturation', Number(e.target.value))}
+                  className="w-full"
+                />
+                <label className="text-sm text-gray-300">Hue</label>
+                <input
+                  type="range"
+                  min="0"
+                  max="360"
+                  value={videoFilters.hue}
+                  onChange={(e) => handleFilterChange('hue', Number(e.target.value))}
+                  className="w-full"
+                />
+                <label className="text-sm text-gray-300">Sepia</label>
+                <input
+                  type="range"
+                  min="0"
+                  max="100"
+                  value={videoFilters.sepia}
+                  onChange={(e) => handleFilterChange('sepia', Number(e.target.value))}
+                  className="w-full"
+                />
+                <label className="text-sm text-gray-300">Blur</label>
+                <input
+                  type="range"
+                  min="0"
+                  max="10"
+                  value={videoFilters.blur}
+                  onChange={(e) => handleFilterChange('blur', Number(e.target.value))}
+                  className="w-full"
+                />
+                <label className="text-sm text-gray-300">Grayscale</label>
+                <input
+                  type="range"
+                  min="0"
+                  max="100"
+                  value={videoFilters.grayscale}
+                  onChange={(e) => handleFilterChange('grayscale', Number(e.target.value))}
+                  className="w-full"
+                />
+                <label className="text-sm text-gray-300">Invert</label>
+                <input
+                  type="range"
+                  min="0"
+                  max="100"
+                  value={videoFilters.invert}
+                  onChange={(e) => handleFilterChange('invert', Number(e.target.value))}
+                  className="w-full"
+                />
               </div>
             )}
           </ScrollArea>
