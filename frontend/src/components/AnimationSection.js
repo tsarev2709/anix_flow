@@ -24,6 +24,10 @@ const AnimationSection = ({ setActiveTab }) => {
   const [imageResolution, setImageResolution] = useState('');
   const [goLiveSceneId, setGoLiveSceneId] = useState(null);
   const [goLivePrompt, setGoLivePrompt] = useState('');
+  const [previewUrl, setPreviewUrl] = useState(null);
+  const [editSceneId, setEditSceneId] = useState(null);
+  const [trimStart, setTrimStart] = useState('');
+  const [trimEnd, setTrimEnd] = useState('');
 
   const handleAddKeyframe = (sceneId) => {
     const updatedAnimation = {
@@ -441,6 +445,34 @@ const AnimationSection = ({ setActiveTab }) => {
     setActiveTab('sound');
   };
 
+  const handleTrimApply = () => {
+    const start = parseFloat(trimStart) || 0;
+    const end = parseFloat(trimEnd) || 0;
+    const updatedAnimation = {
+      ...currentProject.animation,
+      scenes: currentProject.animation.scenes.map(scene => {
+        if (scene.id === editSceneId) {
+          const baseUrl = scene.videoUrl ? scene.videoUrl.split('#')[0] : '';
+          const newUrl = baseUrl ? `${baseUrl}#t=${start},${end}` : baseUrl;
+          return { ...scene, videoUrl: newUrl };
+        }
+        return scene;
+      })
+    };
+
+    const updatedProject = { ...currentProject, animation: updatedAnimation };
+    updateProject(updatedProject);
+
+    toast({
+      title: "Video Trimmed",
+      description: `Applied trim from ${start}s to ${end}s.`,
+    });
+
+    setEditSceneId(null);
+    setTrimStart('');
+    setTrimEnd('');
+  };
+
   // Initialize animation scenes from storyboard if not exists
   React.useEffect(() => {
     if (currentProject?.storyboard?.generated && (!currentProject.animation?.scenes || currentProject.animation.scenes.length === 0)) {
@@ -489,6 +521,7 @@ const AnimationSection = ({ setActiveTab }) => {
       ?.find(k => k.id === historyKeyframeId) : null;
   const goLiveScene = goLiveSceneId ? currentProject.animation.scenes.find(s => s.id === goLiveSceneId) : null;
   const goLiveKeyframe = goLiveScene ? goLiveScene.keyframes[0] : null;
+  const editScene = editSceneId ? currentProject.animation.scenes.find(s => s.id === editSceneId) : null;
 
   return (
     <div className="p-6 space-y-6">
@@ -643,10 +676,31 @@ const AnimationSection = ({ setActiveTab }) => {
                       <div className="flex items-center space-x-2">
                         <div className="h-2 w-2 bg-green-400 rounded-full"></div>
                         <span className="text-green-400 text-sm">Scene rendered successfully</span>
-                        <Button size="sm" variant="outline" className="ml-auto border-green-500/30 text-green-300">
-                          <Play className="h-3 w-3 mr-1" />
-                          Preview
-                        </Button>
+                        <div className="ml-auto flex space-x-2">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => setPreviewUrl(scene.videoUrl)}
+                            className="border-green-500/30 text-green-300"
+                          >
+                            <Play className="h-3 w-3 mr-1" />
+                            Preview
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => {
+                              const range = scene.videoUrl?.split('#t=')[1]?.split(',') || [];
+                              setTrimStart(range[0] || '');
+                              setTrimEnd(range[1] || '');
+                              setEditSceneId(scene.id);
+                            }}
+                            className="border-green-500/30 text-green-300"
+                          >
+                            <Edit className="h-3 w-3 mr-1" />
+                            Edit
+                          </Button>
+                        </div>
                       </div>
                     </div>
                   )}
@@ -699,6 +753,94 @@ const AnimationSection = ({ setActiveTab }) => {
           )}
         </div>
       )}
+
+      {/* Preview Modal */}
+      <Dialog open={!!previewUrl} onOpenChange={(open) => { if (!open) setPreviewUrl(null); }}>
+        <DialogContent className="bg-[#161616]/60 backdrop-blur-xl border-white/20 max-w-3xl">
+          <DialogHeader>
+            <DialogTitle className="text-white flex items-center">
+              <Play className="h-5 w-5 mr-2 text-green-400" />
+              Video Preview
+            </DialogTitle>
+          </DialogHeader>
+          {previewUrl && (
+            <video
+              src={previewUrl}
+              controls
+              className="w-full h-64 object-cover rounded border border-green-400/50"
+            />
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Video Modal */}
+      <Dialog
+        open={editSceneId !== null}
+        onOpenChange={(open) => {
+          if (!open) {
+            setEditSceneId(null);
+            setTrimStart('');
+            setTrimEnd('');
+          }
+        }}
+      >
+        <DialogContent className="bg-[#161616]/60 backdrop-blur-xl border-white/20 max-w-3xl">
+          <DialogHeader>
+            <DialogTitle className="text-white flex items-center">
+              <Edit className="h-5 w-5 mr-2 text-green-400" />
+              Edit Video
+            </DialogTitle>
+          </DialogHeader>
+          {editScene && (
+            <div className="space-y-4">
+              <video
+                src={editScene.videoUrl}
+                controls
+                className="w-full h-64 object-cover rounded border border-green-400/50"
+              />
+              <div className="flex space-x-4">
+                <div className="flex-1 space-y-1">
+                  <label className="text-sm text-gray-300">Start (s)</label>
+                  <Input
+                    type="number"
+                    value={trimStart}
+                    onChange={(e) => setTrimStart(e.target.value)}
+                    className="bg-white/5 border-white/20 text-white"
+                  />
+                </div>
+                <div className="flex-1 space-y-1">
+                  <label className="text-sm text-gray-300">End (s)</label>
+                  <Input
+                    type="number"
+                    value={trimEnd}
+                    onChange={(e) => setTrimEnd(e.target.value)}
+                    className="bg-white/5 border-white/20 text-white"
+                  />
+                </div>
+              </div>
+              <div className="flex justify-end space-x-2">
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setEditSceneId(null);
+                    setTrimStart('');
+                    setTrimEnd('');
+                  }}
+                  className="border-white/20 text-white hover:bg-white/10"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  onClick={handleTrimApply}
+                  className="bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 border border-purple-500/30"
+                >
+                  Apply Trim
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
 
       {/* Go Live Modal */}
       <Dialog
