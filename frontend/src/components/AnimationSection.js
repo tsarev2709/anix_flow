@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Play, Plus, RotateCcw, Send, Download, History, Edit, MessageSquare, RefreshCw, ArrowUp, Trash2, Paperclip, X } from 'lucide-react';
 import { Button } from './ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
@@ -26,8 +26,11 @@ const AnimationSection = ({ setActiveTab }) => {
   const [goLivePrompt, setGoLivePrompt] = useState('');
   const [previewUrl, setPreviewUrl] = useState(null);
   const [editSceneId, setEditSceneId] = useState(null);
-  const [trimStart, setTrimStart] = useState('');
-  const [trimEnd, setTrimEnd] = useState('');
+  const [segments, setSegments] = useState([]);
+  const [dragIndex, setDragIndex] = useState(null);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [videoFilters, setVideoFilters] = useState({ brightness: 100, contrast: 100, saturation: 100 });
+  const videoRef = useRef(null);
 
   const handleAddKeyframe = (sceneId) => {
     const updatedAnimation = {
@@ -444,17 +447,39 @@ const AnimationSection = ({ setActiveTab }) => {
     });
     setActiveTab('sound');
   };
+  const handleCutSegment = () => {
+    const time = currentTime;
+    setSegments(prev => {
+      const index = prev.findIndex(seg => time > seg.start && time < seg.end);
+      if (index === -1) return prev;
+      const seg = prev[index];
+      const newSeg1 = { ...seg, id: `${seg.id}_a`, end: time };
+      const newSeg2 = { ...seg, id: `${seg.id}_b`, start: time };
+      return [...prev.slice(0, index), newSeg1, newSeg2, ...prev.slice(index + 1)];
+    });
+  };
 
-  const handleTrimApply = () => {
-    const start = parseFloat(trimStart) || 0;
-    const end = parseFloat(trimEnd) || 0;
+  const handleDeleteSegment = (index) => {
+    setSegments(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const handleDrop = (index) => {
+    setSegments(prev => {
+      if (dragIndex === null) return prev;
+      const newSegs = [...prev];
+      const [moved] = newSegs.splice(dragIndex, 1);
+      newSegs.splice(index, 0, moved);
+      return newSegs;
+    });
+    setDragIndex(null);
+  };
+
+  const handleEditApply = () => {
     const updatedAnimation = {
       ...currentProject.animation,
       scenes: currentProject.animation.scenes.map(scene => {
         if (scene.id === editSceneId) {
-          const baseUrl = scene.videoUrl ? scene.videoUrl.split('#')[0] : '';
-          const newUrl = baseUrl ? `${baseUrl}#t=${start},${end}` : baseUrl;
-          return { ...scene, videoUrl: newUrl };
+          return { ...scene, segments, filters: videoFilters };
         }
         return scene;
       })
@@ -464,13 +489,14 @@ const AnimationSection = ({ setActiveTab }) => {
     updateProject(updatedProject);
 
     toast({
-      title: "Video Trimmed",
-      description: `Applied trim from ${start}s to ${end}s.`,
+      title: "Video Edited",
+      description: "Timeline and color settings applied.",
     });
 
     setEditSceneId(null);
-    setTrimStart('');
-    setTrimEnd('');
+    setSegments([]);
+    setVideoFilters({ brightness: 100, contrast: 100, saturation: 100 });
+    setCurrentTime(0);
   };
 
   // Initialize animation scenes from storyboard if not exists
@@ -690,10 +716,10 @@ const AnimationSection = ({ setActiveTab }) => {
                             size="sm"
                             variant="outline"
                             onClick={() => {
-                              const range = scene.videoUrl?.split('#t=')[1]?.split(',') || [];
-                              setTrimStart(range[0] || '');
-                              setTrimEnd(range[1] || '');
                               setEditSceneId(scene.id);
+                              setSegments(scene.segments || []);
+                              setVideoFilters(scene.filters || { brightness: 100, contrast: 100, saturation: 100 });
+                              setCurrentTime(0);
                             }}
                             className="border-green-500/30 text-green-300"
                           >
@@ -779,8 +805,9 @@ const AnimationSection = ({ setActiveTab }) => {
         onOpenChange={(open) => {
           if (!open) {
             setEditSceneId(null);
-            setTrimStart('');
-            setTrimEnd('');
+            setSegments([]);
+            setVideoFilters({ brightness: 100, contrast: 100, saturation: 100 });
+            setCurrentTime(0);
           }
         }}
       >
@@ -794,47 +821,97 @@ const AnimationSection = ({ setActiveTab }) => {
           {editScene && (
             <div className="space-y-4">
               <video
+                ref={videoRef}
                 src={editScene.videoUrl}
                 controls
                 className="w-full h-64 object-cover rounded border border-green-400/50"
+                style={{ filter: `brightness(${videoFilters.brightness}%) contrast(${videoFilters.contrast}%) saturate(${videoFilters.saturation}%)` }}
+                onLoadedMetadata={(e) => {
+                  setImageResolution(`${e.target.videoWidth}x${e.target.videoHeight}`);
+                  if (!segments.length) {
+                    setSegments([{ id: `seg_${Date.now()}`, start: 0, end: e.target.duration }]);
+                  }
+                }}
+                onTimeUpdate={(e) => setCurrentTime(e.target.currentTime)}
               />
-              <div className="flex space-x-4">
-                <div className="flex-1 space-y-1">
-                  <label className="text-sm text-gray-300">Start (s)</label>
-                  <Input
-                    type="number"
-                    value={trimStart}
-                    onChange={(e) => setTrimStart(e.target.value)}
-                    className="bg-white/5 border-white/20 text-white"
-                  />
+              <div className="text-right text-sm text-gray-400">{imageResolution}</div>
+              <div className="space-y-2">
+                <div className="flex items-center flex-wrap gap-2">
+                  {segments.map((seg, idx) => (
+                    <div
+                      key={seg.id}
+                      draggable
+                      onDragStart={() => setDragIndex(idx)}
+                      onDrop={() => handleDrop(idx)}
+                      onDragOver={(e) => e.preventDefault()}
+                      className="bg-white/10 text-white px-2 py-1 rounded relative cursor-move"
+                    >
+                      {seg.start.toFixed(1)}-{seg.end.toFixed(1)}s
+                      <button
+                        type="button"
+                        onClick={() => handleDeleteSegment(idx)}
+                        className="absolute -top-1 -right-1 bg-black/60 rounded-full p-0.5 text-white"
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    </div>
+                  ))}
                 </div>
-                <div className="flex-1 space-y-1">
-                  <label className="text-sm text-gray-300">End (s)</label>
-                  <Input
-                    type="number"
-                    value={trimEnd}
-                    onChange={(e) => setTrimEnd(e.target.value)}
-                    className="bg-white/5 border-white/20 text-white"
-                  />
-                </div>
+                <Button
+                  size="sm"
+                  onClick={handleCutSegment}
+                  className="bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 border border-blue-500/30"
+                >
+                  Cut at {currentTime.toFixed(1)}s
+                </Button>
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm text-gray-300">Brightness</label>
+                <input
+                  type="range"
+                  min="0"
+                  max="200"
+                  value={videoFilters.brightness}
+                  onChange={(e) => setVideoFilters({ ...videoFilters, brightness: Number(e.target.value) })}
+                  className="w-full"
+                />
+                <label className="text-sm text-gray-300">Contrast</label>
+                <input
+                  type="range"
+                  min="0"
+                  max="200"
+                  value={videoFilters.contrast}
+                  onChange={(e) => setVideoFilters({ ...videoFilters, contrast: Number(e.target.value) })}
+                  className="w-full"
+                />
+                <label className="text-sm text-gray-300">Saturation</label>
+                <input
+                  type="range"
+                  min="0"
+                  max="200"
+                  value={videoFilters.saturation}
+                  onChange={(e) => setVideoFilters({ ...videoFilters, saturation: Number(e.target.value) })}
+                  className="w-full"
+                />
               </div>
               <div className="flex justify-end space-x-2">
                 <Button
                   variant="outline"
                   onClick={() => {
                     setEditSceneId(null);
-                    setTrimStart('');
-                    setTrimEnd('');
+                    setSegments([]);
+                    setVideoFilters({ brightness: 100, contrast: 100, saturation: 100 });
+                    setCurrentTime(0);
                   }}
                   className="border-white/20 text-white hover:bg-white/10"
                 >
                   Cancel
                 </Button>
                 <Button
-                  onClick={handleTrimApply}
+                  onClick={handleEditApply}
                   className="bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 border border-purple-500/30"
                 >
-                  Apply Trim
+                  Apply Edits
                 </Button>
               </div>
             </div>
