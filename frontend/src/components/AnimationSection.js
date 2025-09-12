@@ -363,6 +363,7 @@ const AnimationSection = ({ setActiveTab }) => {
     const updatedProject = { ...currentProject, animation: updatedAnimation };
     updateProject(updatedProject);
     setIsProcessing(false);
+    setGoLiveSceneId(null);
     setGoLivePrompt('');
 
     toast({
