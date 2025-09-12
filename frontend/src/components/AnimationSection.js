@@ -1,11 +1,12 @@
-import React, { useState } from 'react';
-import { Play, Plus, RotateCcw, Send, Download, History, Edit, MessageSquare, RefreshCw, ArrowUp, Trash2, Paperclip, X } from 'lucide-react';
+import React, { useState, useRef } from 'react';
+import { Play, Plus, RotateCcw, Send, Download, History, Edit, MessageSquare, RefreshCw, ArrowUp, Trash2, Paperclip, X, Scissors } from 'lucide-react';
 import { Button } from './ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Badge } from './ui/badge';
 import { Progress } from './ui/progress';
 import { Input } from './ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
+import { Slider } from './ui/slider';
 import { Switch } from './ui/switch';
 import { useProject } from '../contexts/ProjectContext';
 import { useToast } from '../hooks/use-toast';
@@ -24,6 +25,12 @@ const AnimationSection = ({ setActiveTab }) => {
   const [imageResolution, setImageResolution] = useState('');
   const [goLiveSceneId, setGoLiveSceneId] = useState(null);
   const [goLivePrompt, setGoLivePrompt] = useState('');
+  const [previewUrl, setPreviewUrl] = useState(null);
+  const [editSceneId, setEditSceneId] = useState(null);
+  const [segments, setSegments] = useState([]);
+  const [videoDuration, setVideoDuration] = useState(0);
+  const [filters, setFilters] = useState({ brightness: 100, contrast: 100, saturation: 100, hue: 0 });
+  const videoRef = useRef(null);
 
   const handleAddKeyframe = (sceneId) => {
     const updatedAnimation = {
@@ -441,6 +448,75 @@ const AnimationSection = ({ setActiveTab }) => {
     setActiveTab('sound');
   };
 
+  const handleMetadataLoaded = (e) => {
+    const duration = e.target.duration || 0;
+    setVideoDuration(duration);
+    if (segments.length === 0) {
+      setSegments([{ id: Date.now(), start: 0, end: duration }]);
+    }
+  };
+
+  const handleAddCut = (time) => {
+    const idx = segments.findIndex(s => time > s.start && time < s.end);
+    if (idx !== -1) {
+      const seg = segments[idx];
+      const first = { ...seg, end: time };
+      const second = { id: Date.now(), start: time, end: seg.end };
+      setSegments([...segments.slice(0, idx), first, second, ...segments.slice(idx + 1)]);
+    }
+  };
+
+  const handleTimelineClick = (e) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const clickX = e.clientX - rect.left;
+    const time = (clickX / rect.width) * videoDuration;
+    handleAddCut(time);
+  };
+
+  const handleAddCutAtCurrent = () => {
+    if (videoRef.current) {
+      handleAddCut(videoRef.current.currentTime);
+    }
+  };
+
+  const handleSegmentChange = (index, values) => {
+    const [start, end] = values;
+    setSegments(segments.map((s, i) => i === index ? { ...s, start, end } : s));
+  };
+
+  const handleRemoveSegment = (index) => {
+    setSegments(segments.filter((_, i) => i !== index));
+  };
+
+  const handleFilterChange = (name, value) => {
+    setFilters({ ...filters, [name]: value });
+  };
+
+  const handleApplyEdits = () => {
+    const updatedAnimation = {
+      ...currentProject.animation,
+      scenes: currentProject.animation.scenes.map(scene => {
+        if (scene.id === editSceneId) {
+          return { ...scene, segments, filters };
+        }
+        return scene;
+      })
+    };
+
+    const updatedProject = { ...currentProject, animation: updatedAnimation };
+    updateProject(updatedProject);
+
+    toast({
+      title: "Video Edited",
+      description: `Applied ${segments.length} segments with color adjustments.`,
+    });
+
+    setEditSceneId(null);
+    setSegments([]);
+    setVideoDuration(0);
+    setFilters({ brightness: 100, contrast: 100, saturation: 100, hue: 0 });
+  };
+
   // Initialize animation scenes from storyboard if not exists
   React.useEffect(() => {
     if (currentProject?.storyboard?.generated && (!currentProject.animation?.scenes || currentProject.animation.scenes.length === 0)) {
@@ -489,6 +565,7 @@ const AnimationSection = ({ setActiveTab }) => {
       ?.find(k => k.id === historyKeyframeId) : null;
   const goLiveScene = goLiveSceneId ? currentProject.animation.scenes.find(s => s.id === goLiveSceneId) : null;
   const goLiveKeyframe = goLiveScene ? goLiveScene.keyframes[0] : null;
+  const editScene = editSceneId ? currentProject.animation.scenes.find(s => s.id === editSceneId) : null;
 
   return (
     <div className="p-6 space-y-6">
@@ -643,10 +720,31 @@ const AnimationSection = ({ setActiveTab }) => {
                       <div className="flex items-center space-x-2">
                         <div className="h-2 w-2 bg-green-400 rounded-full"></div>
                         <span className="text-green-400 text-sm">Scene rendered successfully</span>
-                        <Button size="sm" variant="outline" className="ml-auto border-green-500/30 text-green-300">
-                          <Play className="h-3 w-3 mr-1" />
-                          Preview
-                        </Button>
+                        <div className="ml-auto flex space-x-2">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => setPreviewUrl(scene.videoUrl)}
+                            className="border-green-500/30 text-green-300"
+                          >
+                            <Play className="h-3 w-3 mr-1" />
+                            Preview
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => {
+                              const existing = scene.segments || [];
+                              setSegments(existing.length ? existing : []);
+                              setFilters(scene.filters || { brightness: 100, contrast: 100, saturation: 100, hue: 0 });
+                              setEditSceneId(scene.id);
+                            }}
+                            className="border-green-500/30 text-green-300"
+                          >
+                            <Edit className="h-3 w-3 mr-1" />
+                            Edit
+                          </Button>
+                        </div>
                       </div>
                     </div>
                   )}
@@ -699,6 +797,160 @@ const AnimationSection = ({ setActiveTab }) => {
           )}
         </div>
       )}
+
+      {/* Preview Modal */}
+      <Dialog open={!!previewUrl} onOpenChange={(open) => { if (!open) setPreviewUrl(null); }}>
+        <DialogContent className="bg-[#161616]/60 backdrop-blur-xl border-white/20 max-w-3xl">
+          <DialogHeader>
+            <DialogTitle className="text-white flex items-center">
+              <Play className="h-5 w-5 mr-2 text-green-400" />
+              Video Preview
+            </DialogTitle>
+          </DialogHeader>
+          {previewUrl && (
+            <video
+              src={previewUrl}
+              controls
+              className="w-full h-64 object-cover rounded border border-green-400/50"
+            />
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Video Modal */}
+      <Dialog
+        open={editSceneId !== null}
+        onOpenChange={(open) => {
+          if (!open) {
+            setEditSceneId(null);
+            setSegments([]);
+            setVideoDuration(0);
+            setFilters({ brightness: 100, contrast: 100, saturation: 100, hue: 0 });
+          }
+        }}
+      >
+        <DialogContent className="bg-[#161616]/60 backdrop-blur-xl border-white/20 max-w-3xl">
+          <DialogHeader>
+            <DialogTitle className="text-white flex items-center">
+              <Edit className="h-5 w-5 mr-2 text-green-400" />
+              Edit Video
+            </DialogTitle>
+          </DialogHeader>
+          {editScene && (
+            <div className="space-y-4">
+              <video
+                ref={videoRef}
+                src={editScene.videoUrl}
+                controls
+                onLoadedMetadata={handleMetadataLoaded}
+                style={{ filter: `brightness(${filters.brightness}%) contrast(${filters.contrast}%) saturate(${filters.saturation}%) hue-rotate(${filters.hue}deg)` }}
+                className="w-full h-64 object-cover rounded border border-green-400/50"
+              />
+              <div className="space-y-2">
+                <div
+                  className="relative h-2 bg-gray-700 rounded cursor-pointer"
+                  onClick={handleTimelineClick}
+                >
+                  {segments.map(seg => (
+                    <div
+                      key={seg.id}
+                      style={{
+                        left: `${(seg.start / videoDuration) * 100}%`,
+                        width: `${((seg.end - seg.start) / videoDuration) * 100}%`
+                      }}
+                      className="absolute top-0 h-2 bg-teal-500"
+                    ></div>
+                  ))}
+                </div>
+                {segments.map((seg, idx) => (
+                  <div key={seg.id} className="flex items-center space-x-2">
+                    <Slider
+                      value={[seg.start, seg.end]}
+                      max={videoDuration}
+                      step={0.1}
+                      onValueChange={(v) => handleSegmentChange(idx, v)}
+                      className="flex-1"
+                    />
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      onClick={() => handleRemoveSegment(idx)}
+                    >
+                      <Trash2 className="h-4 w-4 text-red-400" />
+                    </Button>
+                  </div>
+                ))}
+                <Button
+                  size="sm"
+                  onClick={handleAddCutAtCurrent}
+                  className="flex items-center bg-teal-500/20 hover:bg-teal-500/30 text-teal-300 border border-teal-500/30"
+                >
+                  <Scissors className="h-3 w-3 mr-1" />
+                  Cut at Current Time
+                </Button>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1">
+                  <label className="text-sm text-gray-300">Brightness</label>
+                  <Slider
+                    value={[filters.brightness]}
+                    min={0}
+                    max={200}
+                    onValueChange={(v) => handleFilterChange('brightness', v[0])}
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-sm text-gray-300">Contrast</label>
+                  <Slider
+                    value={[filters.contrast]}
+                    min={0}
+                    max={200}
+                    onValueChange={(v) => handleFilterChange('contrast', v[0])}
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-sm text-gray-300">Saturation</label>
+                  <Slider
+                    value={[filters.saturation]}
+                    min={0}
+                    max={200}
+                    onValueChange={(v) => handleFilterChange('saturation', v[0])}
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-sm text-gray-300">Hue</label>
+                  <Slider
+                    value={[filters.hue]}
+                    min={0}
+                    max={360}
+                    onValueChange={(v) => handleFilterChange('hue', v[0])}
+                  />
+                </div>
+              </div>
+              <div className="flex justify-end space-x-2">
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setEditSceneId(null);
+                    setSegments([]);
+                    setVideoDuration(0);
+                    setFilters({ brightness: 100, contrast: 100, saturation: 100, hue: 0 });
+                  }}
+                  className="border-white/20 text-white hover:bg-white/10"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  onClick={handleApplyEdits}
+                  className="bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 border border-purple-500/30"
+                >
+                  Apply Edits
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
 
       {/* Go Live Modal */}
       <Dialog
