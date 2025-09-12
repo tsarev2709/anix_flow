@@ -6,6 +6,7 @@ import { Badge } from './ui/badge';
 import { Progress } from './ui/progress';
 import { Input } from './ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
+import { Switch } from './ui/switch';
 import { useProject } from '../contexts/ProjectContext';
 import { useToast } from '../hooks/use-toast';
 import { IMAGE_PRESETS } from '../mock';
@@ -21,6 +22,8 @@ const AnimationSection = ({ setActiveTab }) => {
   const [modifyImages, setModifyImages] = useState([]);
   const [historyKeyframeId, setHistoryKeyframeId] = useState(null);
   const [imageResolution, setImageResolution] = useState('');
+  const [goLiveSceneId, setGoLiveSceneId] = useState(null);
+  const [goLivePrompt, setGoLivePrompt] = useState('');
 
   const handleAddKeyframe = (sceneId) => {
     const updatedAnimation = {
@@ -306,6 +309,68 @@ const AnimationSection = ({ setActiveTab }) => {
     });
   };
 
+  const handleToggleMode = (sceneId, ezMode) => {
+    const updatedAnimation = {
+      ...currentProject.animation,
+      scenes: currentProject.animation.scenes.map(scene =>
+        scene.id === sceneId ? { ...scene, ezMode } : scene
+      )
+    };
+    const updatedProject = { ...currentProject, animation: updatedAnimation };
+    updateProject(updatedProject);
+  };
+
+  const handleGoLive = (sceneId) => {
+    setGoLiveSceneId(sceneId);
+    setGoLivePrompt('');
+    setImageResolution('');
+  };
+
+  const handleGenerateLive = async (sceneId) => {
+    setIsProcessing(true);
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    const placeholderVideo = "https://www.w3schools.com/html/mov_bbb.mp4";
+
+    const updatedAnimation = {
+      ...currentProject.animation,
+      scenes: currentProject.animation.scenes.map(scene => {
+        if (scene.id === sceneId) {
+          return {
+            ...scene,
+            keyframes: scene.keyframes.map((keyframe, index) => {
+              if (index === 0) {
+                const newHistoryEntry = {
+                  id: `keyframe_history_${Date.now()}`,
+                  video: placeholderVideo,
+                  timestamp: new Date().toISOString(),
+                  style: 'live',
+                  prompt: goLivePrompt || null
+                };
+                return {
+                  ...keyframe,
+                  video: placeholderVideo,
+                  history: [newHistoryEntry, ...(keyframe.history || [])]
+                };
+              }
+              return keyframe;
+            })
+          };
+        }
+        return scene;
+      })
+    };
+
+    const updatedProject = { ...currentProject, animation: updatedAnimation };
+    updateProject(updatedProject);
+    setIsProcessing(false);
+    setGoLivePrompt('');
+
+    toast({
+      title: "Scene Animated",
+      description: "Keyframe animated based on prompt.",
+    });
+  };
+
   const handleRenderScene = async (sceneId) => {
     setIsProcessing(true);
     setRenderProgress(0);
@@ -395,7 +460,8 @@ const AnimationSection = ({ setActiveTab }) => {
             prompt: null
           }]
         }],
-        rendered: false
+        rendered: false,
+        ezMode: true
       }));
 
       const updatedProject = {
@@ -412,14 +478,16 @@ const AnimationSection = ({ setActiveTab }) => {
 
   const hasStoryboard = currentProject.storyboard?.generated;
   const hasAnimationScenes = currentProject.animation?.scenes?.length > 0;
-  const currentKeyframe = selectedKeyframe ? 
+  const currentKeyframe = selectedKeyframe ?
     currentProject.animation?.scenes
       ?.find(s => s.id === selectedKeyframe.sceneId)
       ?.keyframes?.find(k => k.id === selectedKeyframe.keyframeId) : null;
-  const historyKeyframe = historyKeyframeId ? 
+  const historyKeyframe = historyKeyframeId ?
     currentProject.animation?.scenes
       ?.flatMap(s => s.keyframes)
       ?.find(k => k.id === historyKeyframeId) : null;
+  const goLiveScene = goLiveSceneId ? currentProject.animation.scenes.find(s => s.id === goLiveSceneId) : null;
+  const goLiveKeyframe = goLiveScene ? goLiveScene.keyframes[0] : null;
 
   return (
     <div className="p-6 space-y-6">
@@ -467,19 +535,40 @@ const AnimationSection = ({ setActiveTab }) => {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
-              {hasAnimationScenes && currentProject.animation.scenes.map((scene, sceneIndex) => (
+              {hasAnimationScenes && currentProject.animation.scenes.map((scene, sceneIndex) => {
+                const isEzMode = scene.ezMode !== false;
+                return (
                 <div key={scene.id} className="space-y-3">
                   <div className="flex items-center justify-between">
                     <h4 className="text-white font-medium">Scene {sceneIndex + 1}</h4>
                     <div className="flex items-center space-x-2">
-                      <Button
-                        size="sm"
-                        onClick={() => handleAddKeyframe(scene.id)}
-                        className="bg-teal-500/20 hover:bg-teal-500/30 text-teal-300 border border-teal-500/30"
-                      >
-                        <Plus className="h-3 w-3 mr-1" />
-                        Add Keyframe
-                      </Button>
+                      <div className="flex items-center space-x-1 text-xs text-gray-400">
+                        <span>ez mod</span>
+                        <Switch
+                          checked={!isEzMode}
+                          onCheckedChange={(checked) => handleToggleMode(scene.id, !checked)}
+                        />
+                        <span>pro mod</span>
+                      </div>
+                      {isEzMode ? (
+                        <Button
+                          size="sm"
+                          onClick={() => handleGoLive(scene.id)}
+                          className="bg-teal-500/20 hover:bg-teal-500/30 text-teal-300 border border-teal-500/30"
+                        >
+                          <RefreshCw className="h-3 w-3 mr-1" />
+                          Go Live
+                        </Button>
+                      ) : (
+                        <Button
+                          size="sm"
+                          onClick={() => handleAddKeyframe(scene.id)}
+                          className="bg-teal-500/20 hover:bg-teal-500/30 text-teal-300 border border-teal-500/30"
+                        >
+                          <Plus className="h-3 w-3 mr-1" />
+                          Add Keyframe
+                        </Button>
+                      )}
                       <Button
                         size="sm"
                         onClick={() => handleRenderScene(scene.id)}
@@ -533,7 +622,7 @@ const AnimationSection = ({ setActiveTab }) => {
                             )}
                           </div>
 
-                          {index < scene.keyframes.length - 1 && (
+                          {index < scene.keyframes.length - 1 && !isEzMode && (
                             <Button
                               size="sm"
                               variant="outline"
@@ -561,7 +650,8 @@ const AnimationSection = ({ setActiveTab }) => {
                     </div>
                   )}
                 </div>
-              ))}
+                );
+              })}
 
               {/* Render Progress */}
               {isProcessing && (
@@ -608,6 +698,101 @@ const AnimationSection = ({ setActiveTab }) => {
           )}
         </div>
       )}
+
+      {/* Go Live Modal */}
+      <Dialog
+        open={goLiveSceneId !== null}
+        onOpenChange={(open) => {
+          if (!open) {
+            setGoLiveSceneId(null);
+            setGoLivePrompt('');
+            setImageResolution('');
+          }
+        }}
+      >
+        <DialogContent className="bg-[#161616]/60 backdrop-blur-xl border-white/20 max-w-3xl">
+          <DialogHeader>
+            <DialogTitle className="text-white flex items-center">
+              <RefreshCw className="h-5 w-5 mr-2 text-teal-400" />
+              Go Live - Scene {goLiveSceneId ? currentProject.animation.scenes.findIndex(s => s.id === goLiveSceneId) + 1 : ''}
+            </DialogTitle>
+          </DialogHeader>
+          {goLiveScene && goLiveKeyframe && (
+            <div className="space-y-4">
+              {goLiveKeyframe.video ? (
+                <video
+                  src={goLiveKeyframe.video}
+                  controls
+                  className="w-full h-64 object-cover rounded border border-teal-400/50"
+                  onLoadedMetadata={(e) => setImageResolution(`${e.target.videoWidth}x${e.target.videoHeight}`)}
+                />
+              ) : (
+                <img
+                  src={goLiveKeyframe.image}
+                  alt="Scene keyframe"
+                  className="w-full h-64 object-cover rounded border border-teal-400/50"
+                  onLoad={(e) => setImageResolution(`${e.target.naturalWidth}x${e.target.naturalHeight}`)}
+                />
+              )}
+              <div className="text-right text-sm text-gray-400">{imageResolution}</div>
+              <div className="flex items-center space-x-2 flex-wrap">
+                <Button
+                  size="sm"
+                  onClick={() => setHistoryKeyframeId(goLiveKeyframe.id)}
+                  className="bg-yellow-500/20 hover:bg-yellow-500/30 text-yellow-300 border border-yellow-500/30"
+                >
+                  <History className="h-3 w-3 mr-1" />
+                  History
+                </Button>
+                <Button
+                  size="sm"
+                  onClick={() => handleUpscaleKeyframe(goLiveSceneId, goLiveKeyframe.id)}
+                  disabled={isProcessing}
+                  className="bg-green-500/20 hover:bg-green-500/30 text-green-300 border border-green-500/30"
+                >
+                  <ArrowUp className="h-3 w-3 mr-1" />
+                  Upscale
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => {
+                    setGoLiveSceneId(null);
+                    setGoLivePrompt('');
+                    setImageResolution('');
+                  }}
+                  className="border-white/20 text-white hover:bg-white/10"
+                >
+                  Close
+                </Button>
+              </div>
+              <div className="flex items-center space-x-2">
+                <MessageSquare className="h-4 w-4 text-blue-400" />
+                <Input
+                  value={goLivePrompt}
+                  onChange={(e) => setGoLivePrompt(e.target.value)}
+                  placeholder="Enter animation prompt..."
+                  className="bg-white/5 border-white/20 text-white placeholder-gray-500 flex-1"
+                  onKeyPress={(e) => {
+                    if (e.key === 'Enter') {
+                      handleGenerateLive(goLiveSceneId);
+                    }
+                  }}
+                />
+                <Button
+                  size="sm"
+                  onClick={() => handleGenerateLive(goLiveSceneId)}
+                  disabled={isProcessing}
+                  className="bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 border border-purple-500/30"
+                >
+                  <Play className="h-3 w-3 mr-1" />
+                  Go Live
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
 
       {/* Frame Editor Modal */}
       <Dialog open={!!selectedKeyframe} onOpenChange={(open) => { if (!open) { setSelectedKeyframe(null); setModifyPrompt(''); setImageResolution(''); } }}>
