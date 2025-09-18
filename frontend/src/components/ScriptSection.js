@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Wand2, RefreshCw, Send, Download, History, GripVertical, Plus, Trash2, MessageSquare } from 'lucide-react';
 import { Button } from './ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
@@ -8,68 +8,127 @@ import { Badge } from './ui/badge';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from './ui/alert-dialog';
 import { useProject } from '../contexts/ProjectContext';
 import { useToast } from '../hooks/use-toast';
-import { SCRIPT_PRESETS, NARRATOR_OPTIONS } from '../mock';
+import { NARRATOR_OPTIONS } from '../mock';
+
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:8000';
 
 const ScriptSection = ({ setActiveTab }) => {
   const { currentProject, updateProject } = useProject();
   const { toast } = useToast();
   const [isGenerating, setIsGenerating] = useState(false);
-  const [selectedNarrator, setSelectedNarrator] = useState('friendly');
+  const [selectedNarrator, setSelectedNarrator] = useState(currentProject?.script?.narrator || 'friendly');
   const [draggedIndex, setDraggedIndex] = useState(null);
   const [userPrompt, setUserPrompt] = useState(currentProject?.script?.userPrompt || '');
   const [deleteSceneIndex, setDeleteSceneIndex] = useState(null);
 
-  const handleGenerateScript = async () => {
-    setIsGenerating(true);
-    
-    // Simulate AI generation delay
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    
+  useEffect(() => {
+    setSelectedNarrator(currentProject?.script?.narrator || 'friendly');
+    setUserPrompt(currentProject?.script?.userPrompt || '');
+  }, [currentProject]);
+
+  const requestScriptGeneration = async () => {
+    if (!currentProject) {
+      throw new Error('Текущий проект не найден.');
+    }
+
+    const scenesCount = Math.max(1, currentProject?.script?.scenes?.length || 5);
+    const response = await fetch(`${API_BASE_URL}/api/generate-script`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        userPrompt: userPrompt?.trim() || 'Пустой запрос',
+        narrator: selectedNarrator,
+        scenesCount,
+      }),
+    });
+
+    const payload = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      throw new Error(payload?.detail || 'Не удалось сгенерировать сценарий.');
+    }
+
+    const generateSceneId = () => {
+      if (typeof window !== 'undefined' && window.crypto?.randomUUID) {
+        return window.crypto.randomUUID();
+      }
+      return `scene_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+    };
+
+    const scenes = Array.isArray(payload?.scenes)
+      ? payload.scenes
+          .map((scene) => {
+            const parsedDuration = Number(scene?.duration);
+            return {
+              id: scene?.id || generateSceneId(),
+              content: typeof scene?.content === 'string' ? scene.content.trim() : '',
+              duration: Number.isFinite(parsedDuration) ? parsedDuration : 5,
+            };
+          })
+          .filter((scene) => scene.content)
+      : [];
+
+    if (!scenes.length) {
+      throw new Error('Модель не вернула ни одной сцены.');
+    }
+
     const updatedProject = {
       ...currentProject,
       script: {
-        ...SCRIPT_PRESETS.primary,
+        title: payload?.title || currentProject?.script?.title || 'Новый сценарий',
+        narrator: payload?.narrator || selectedNarrator,
+        scenes,
         generated: true,
-        narrator: selectedNarrator,
-        userPrompt: userPrompt
-      }
+        userPrompt,
+      },
     };
-    
+
     updateProject(updatedProject);
-    setIsGenerating(false);
-    
-    toast({
-      title: "Сценарий создан!",
-      description: "Ваша вселенная готова к рождению!",
-    });
+    setSelectedNarrator(updatedProject.script.narrator);
+    return updatedProject;
+  };
+
+  const handleGenerateScript = async () => {
+    setIsGenerating(true);
+    try {
+      await requestScriptGeneration();
+      toast({
+        title: "Сценарий создан!",
+        description: "Ваша вселенная готова к рождению!",
+      });
+    } catch (error) {
+      console.error(error);
+      const description = error instanceof Error ? error.message : 'Произошла непредвиденная ошибка.';
+      toast({
+        title: "Ошибка генерации",
+        description,
+        variant: "destructive",
+      });
+    } finally {
+      setIsGenerating(false);
+    }
   };
 
   const handleRegenerateScript = async () => {
     setIsGenerating(true);
-    
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    
-    // Toggle between presets
-    const useAlternate = currentProject.script.title === SCRIPT_PRESETS.primary.title;
-    const newPreset = useAlternate ? SCRIPT_PRESETS.alternate : SCRIPT_PRESETS.primary;
-    
-    const updatedProject = {
-      ...currentProject,
-      script: {
-        ...newPreset,
-        generated: true,
-        narrator: selectedNarrator,
-        userPrompt: userPrompt
-      }
-    };
-    
-    updateProject(updatedProject);
-    setIsGenerating(false);
-    
-    toast({
-      title: "Сценарий обновлён!",
-      description: "Новая версия уже ждёт вас!",
-    });
+    try {
+      await requestScriptGeneration();
+      toast({
+        title: "Сценарий обновлён!",
+        description: "Новая версия уже ждёт вас!",
+      });
+    } catch (error) {
+      console.error(error);
+      const description = error instanceof Error ? error.message : 'Произошла непредвиденная ошибка.';
+      toast({
+        title: "Ошибка генерации",
+        description,
+        variant: "destructive",
+      });
+    } finally {
+      setIsGenerating(false);
+    }
   };
 
   const handleRegenerateScene = async (sceneIndex) => {
