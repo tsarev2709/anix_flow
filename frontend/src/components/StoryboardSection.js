@@ -24,8 +24,8 @@ const StoryboardSection = ({ setActiveTab }) => {
   const handleGenerateImages = async () => {
     if (!currentProject.script.generated) {
       toast({
-        title: "No Script Available",
-        description: "Please generate a script first before creating storyboards.",
+        title: "Нет сценария",
+        description: "Сначала сгенерируйте сценарий, чтобы создать раскадровку.",
         variant: "destructive"
       });
       return;
@@ -62,8 +62,8 @@ const StoryboardSection = ({ setActiveTab }) => {
     setIsGenerating(false);
 
     toast({
-      title: "Storyboard Generated",
-      description: "Visual storyboards have been created for all scenes!",
+      title: "Раскадровка создана",
+      description: "Визуальные раскадровки созданы для всех сцен!",
     });
   };
 
@@ -107,8 +107,8 @@ const StoryboardSection = ({ setActiveTab }) => {
     setIsGenerating(false);
 
     toast({
-      title: "Image Regenerated",
-      description: "New variation has been generated!",
+      title: "Изображение обновлено",
+      description: "Создан новый вариант!",
     });
   };
 
@@ -131,8 +131,8 @@ const StoryboardSection = ({ setActiveTab }) => {
   const handleModifyWithPrompt = async (sceneId) => {
     if (!modifyPrompt.trim() && modifyImages.length === 0) {
       toast({
-        title: "Input Required",
-        description: "Please enter a modification prompt or upload an image.",
+        title: "Нужно заполнить поля",
+        description: "Введите запрос на изменение или загрузите изображение.",
         variant: "destructive"
       });
       return;
@@ -194,8 +194,8 @@ const StoryboardSection = ({ setActiveTab }) => {
     setModifyImages([]);
 
     toast({
-      title: "Image Modified",
-      description: modifyPrompt ? `Image updated based on prompt: "${modifyPrompt}"` : "Image updated with uploaded image",
+      title: "Изображение изменено",
+      description: modifyPrompt ? `Изображение обновлено по запросу: "${modifyPrompt}"` : "Изображение обновлено с загруженным изображением",
     });
   };
 
@@ -224,16 +224,16 @@ const StoryboardSection = ({ setActiveTab }) => {
     setHistorySceneId(null);
 
     toast({
-      title: "Version Restored",
-      description: "Image has been reverted to the selected version.",
+      title: "Версия восстановлена",
+      description: "Изображение возвращено к выбранной версии.",
     });
   };
 
   const handleSendToAnimation = () => {
     if (!currentProject.storyboard.generated) {
       toast({
-        title: "No Storyboard Available",
-        description: "Please generate storyboards first.",
+        title: "Раскадровка отсутствует",
+        description: "Сначала сгенерируйте раскадровку.",
         variant: "destructive"
       });
       return;
@@ -268,14 +268,14 @@ const StoryboardSection = ({ setActiveTab }) => {
     updateProject(updatedProject);
 
     toast({
-      title: "Sent to Animation",
-      description: "Storyboards have been sent to the animation section!",
+      title: "Отправлено в анимацию",
+      description: "Раскадровка отправлена в раздел анимации!",
     });
     setActiveTab('animation');
   };
 
   if (!currentProject) {
-    return <div className="p-6 text-white">No project selected</div>;
+    return <div className="p-6 text-white">Проект не выбран</div>;
   }
 
   const hasStoryboard = currentProject.storyboard?.generated;
@@ -286,21 +286,21 @@ const StoryboardSection = ({ setActiveTab }) => {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-white mb-2">Visual Storyboard</h1>
-          <p className="text-gray-400">Generate images for your animation scenes</p>
+          <h1 className="text-2xl font-bold text-white mb-2">Визуальная раскадровка</h1>
+          <p className="text-gray-400">Создайте изображения для сцен анимации</p>
         </div>
         
         <div className="flex items-center space-x-3">
           <Badge variant="outline" className="border-teal-500/30 text-teal-300">
-            {hasStoryboard ? 'Generated' : 'Not Generated'}
+            {hasStoryboard ? 'Готово' : 'Не создано'}
           </Badge>
           <Button variant="outline" className="border-white/20 text-white hover:bg-white/10">
             <History className="h-4 w-4 mr-2" />
-            History
+            История
           </Button>
           <Button variant="outline" className="border-white/20 text-white hover:bg-white/10">
             <Download className="h-4 w-4 mr-2" />
-            Export
+            Экспорт
           </Button>
         </div>
       </div>
@@ -312,12 +312,12 @@ const StoryboardSection = ({ setActiveTab }) => {
             <CardHeader>
               <CardTitle className="text-white flex items-center">
                 <Wand2 className="h-5 w-5 mr-2 text-teal-400" />
-                Image Generation
+                Генерация изображений
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <label className="text-sm text-gray-300 mb-2 block">Image Style</label>
+                <label className="text-sm text-gray-300 mb-2 block">Стиль изображения</label>
                 <Select value={selectedStyle} onValueChange={setSelectedStyle}>
                   <SelectTrigger className="bg-white/5 border-white/20 text-white">
                     <SelectValue />
@@ -332,18 +332,18 @@ const StoryboardSection = ({ setActiveTab }) => {
                 </Select>
               </div>
 
-              <Button 
+              <Button
                 onClick={handleGenerateImages}
                 disabled={isGenerating || !currentProject.script.generated}
                 className="w-full bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700 text-white border-0"
               >
                 <Wand2 className="h-4 w-4 mr-2" />
-                Generate Images
+                Сгенерировать изображения
               </Button>
 
               {!currentProject.script.generated && (
                 <p className="text-xs text-amber-400 bg-amber-500/10 p-2 rounded border border-amber-500/20">
-                  Generate a script first to create storyboards
+                  Сначала сгенерируйте сценарий, чтобы создать раскадровку
                 </p>
               )}
 
@@ -351,7 +351,7 @@ const StoryboardSection = ({ setActiveTab }) => {
                 <div className="text-center py-4">
                   <div className="inline-flex items-center space-x-2 text-teal-400">
                     <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-teal-400"></div>
-                    <span className="text-sm">Generating images...</span>
+                    <span className="text-sm">Генерация изображений...</span>
                   </div>
                 </div>
               )}
@@ -361,20 +361,20 @@ const StoryboardSection = ({ setActiveTab }) => {
           {hasStoryboard && (
             <Card className="bg-[#161616]/60 backdrop-blur-xl border-white/10">
               <CardHeader>
-                <CardTitle className="text-white text-lg">Storyboard Info</CardTitle>
+                <CardTitle className="text-white text-lg">Сведения о раскадровке</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between">
-                    <span className="text-gray-400">Images:</span>
+                    <span className="text-gray-400">Изображения:</span>
                     <span className="text-white">{currentProject.storyboard.scenes.length}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-400">Style:</span>
+                    <span className="text-gray-400">Стиль:</span>
                     <span className="text-white">{IMAGE_STYLES.find(s => s.value === selectedStyle)?.label}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-400">Resolution:</span>
+                    <span className="text-gray-400">Разрешение:</span>
                     <span className="text-white">800x450</span>
                   </div>
                 </div>
@@ -391,7 +391,7 @@ const StoryboardSection = ({ setActiveTab }) => {
                 <Card key={scene.id} className="bg-[#161616]/60 backdrop-blur-xl border-white/10">
                   <CardHeader>
                     <div className="flex items-center justify-between">
-                      <CardTitle className="text-white text-lg">Scene {index + 1}</CardTitle>
+                      <CardTitle className="text-white text-lg">Сцена {index + 1}</CardTitle>
                       <div className="flex items-center space-x-2">
                         <Badge variant="outline" className="border-purple-500/30 text-purple-300 text-xs">
                           {scene.style}
@@ -404,7 +404,7 @@ const StoryboardSection = ({ setActiveTab }) => {
                           className="border-white/20 text-white hover:bg-white/10"
                         >
                           <RefreshCw className="h-3 w-3 mr-1" />
-                          Regenerate
+                          Сгенерировать ещё
                         </Button>
                         <Button
                           size="sm"
@@ -418,7 +418,7 @@ const StoryboardSection = ({ setActiveTab }) => {
                           className="border-blue-500/30 text-blue-300 hover:bg-blue-500/10"
                         >
                           <Edit className="h-3 w-3 mr-1" />
-                          Modify
+                          Изменить
                         </Button>
                         <Button
                           size="sm"
@@ -427,7 +427,7 @@ const StoryboardSection = ({ setActiveTab }) => {
                           className="border-yellow-500/30 text-yellow-300 hover:bg-yellow-500/10"
                         >
                           <History className="h-3 w-3 mr-1" />
-                          History
+                          История
                         </Button>
                         <Button
                           size="sm"
@@ -435,7 +435,7 @@ const StoryboardSection = ({ setActiveTab }) => {
                           className="border-white/20 text-white hover:bg-white/10"
                         >
                           <ArrowUp className="h-3 w-3 mr-1" />
-                          Upscale
+                          Повысить качество
                         </Button>
                       </div>
                     </div>
@@ -446,7 +446,7 @@ const StoryboardSection = ({ setActiveTab }) => {
                         <div className="relative overflow-hidden rounded-lg bg-white/5">
                           <img 
                             src={scene.image} 
-                            alt={`Scene ${index + 1}`}
+                            alt={`Сцена ${index + 1}`}
                             className="w-full h-48 object-cover"
                             onError={(e) => {
                               e.target.src = "https://picsum.photos/800/450?grayscale";
@@ -459,7 +459,7 @@ const StoryboardSection = ({ setActiveTab }) => {
                         </div>
                       </div>
                       <div className="space-y-2">
-                        <h4 className="text-sm font-medium text-white">Scene Description</h4>
+                        <h4 className="text-sm font-medium text-white">Описание сцены</h4>
                         <p className="text-sm text-gray-300 leading-relaxed">{scene.content}</p>
                       </div>
                     </div>
@@ -469,14 +469,14 @@ const StoryboardSection = ({ setActiveTab }) => {
                       <div className="mt-4 p-4 bg-white/5 rounded-lg border border-blue-500/30">
                         <div className="flex items-center space-x-2 mb-2">
                           <MessageSquare className="h-4 w-4 text-blue-400" />
-                          <span className="text-blue-300 text-sm font-medium">Modify with Prompt or Image</span>
+                          <span className="text-blue-300 text-sm font-medium">Измените по запросу или изображению</span>
                         </div>
                         <div className="flex space-x-2">
                           <div className="relative flex-1">
                             <Input
                               value={modifyPrompt}
                               onChange={(e) => setModifyPrompt(e.target.value)}
-                              placeholder="e.g., make it night time, remove background..."
+                              placeholder="например: сделать ночную сцену, убрать фон..."
                               className="bg-white/5 border-white/20 text-white placeholder-gray-500 w-full pr-8"
                               onKeyPress={(e) => {
                                 if (e.key === 'Enter') {
@@ -505,7 +505,7 @@ const StoryboardSection = ({ setActiveTab }) => {
                             disabled={isGenerating}
                             className="bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 border border-blue-500/30"
                           >
-                            Apply
+                            Применить
                           </Button>
                           <Button
                             size="sm"
@@ -517,7 +517,7 @@ const StoryboardSection = ({ setActiveTab }) => {
                             }}
                             className="border-white/20 text-white hover:bg-white/10"
                           >
-                            Cancel
+                            Отмена
                           </Button>
                         </div>
                         {modifyImages.length > 0 && (
@@ -526,7 +526,7 @@ const StoryboardSection = ({ setActiveTab }) => {
                               <div key={idx} className="relative">
                                 <img
                                   src={img}
-                                  alt={`preview-${idx}`}
+                                  alt={`предпросмотр-${idx}`}
                                   className="h-12 w-12 object-cover rounded border border-white/20"
                                 />
                                 <button
@@ -546,18 +546,18 @@ const StoryboardSection = ({ setActiveTab }) => {
                 </Card>
               ))}
 
-              {/* Send to Animation */}
+              {/* Передать в анимацию */}
               <Card className="bg-gradient-to-r from-teal-500/10 to-purple-500/10 border-teal-400/30 backdrop-blur-xl">
                 <CardContent className="p-6">
                   <div className="text-center">
-                    <h3 className="text-lg font-semibold text-white mb-2">Storyboard Complete!</h3>
-                    <p className="text-gray-300 mb-4">Ready to animate your scenes?</p>
+                    <h3 className="text-lg font-semibold text-white mb-2">Раскадровка готова!</h3>
+                    <p className="text-gray-300 mb-4">Готовы оживить сцены?</p>
                     <Button 
                       onClick={handleSendToAnimation}
                       className="bg-gradient-to-r from-teal-500 to-purple-500 hover:from-teal-600 hover:to-purple-600 text-white border-0"
                     >
                       <Send className="h-4 w-4 mr-2" />
-                      Send to Animation
+                      Передать в анимацию
                     </Button>
                   </div>
                 </CardContent>
@@ -567,8 +567,8 @@ const StoryboardSection = ({ setActiveTab }) => {
             <Card className="bg-[#161616]/60 backdrop-blur-xl border-white/10 h-96 flex items-center justify-center">
               <div className="text-center">
                 <ImageIcon className="h-12 w-12 text-gray-500 mx-auto mb-4" />
-                <h3 className="text-lg font-semibold text-white mb-2">No Storyboard Generated</h3>
-                <p className="text-gray-400 mb-4">Generate images for your script scenes</p>
+                <h3 className="text-lg font-semibold text-white mb-2">Раскадровка не создана</h3>
+                <p className="text-gray-400 mb-4">Создайте изображения для сцен сценария</p>
               </div>
             </Card>
           )}
@@ -581,7 +581,7 @@ const StoryboardSection = ({ setActiveTab }) => {
         onClose={() => setHistorySceneId(null)}
         history={currentScene?.history || []}
         onRevert={(version) => handleRevertToVersion(historySceneId, version)}
-        title={`Scene ${currentProject.storyboard?.scenes?.findIndex(s => s.id === historySceneId) + 1 || ''} History`}
+        title={`История сцены ${currentProject.storyboard?.scenes?.findIndex(s => s.id === historySceneId) + 1 || ''}`}
       />
     </div>
   );
