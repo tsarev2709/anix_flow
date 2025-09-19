@@ -26,8 +26,8 @@ const SoundSection = () => {
   const handleGenerateVoiceover = async () => {
     if (!currentProject.script?.generated) {
       toast({
-        title: "No Script Available",
-        description: "Generate a script first to create voiceovers.",
+        title: "Нет сценария",
+        description: "Сначала сгенерируйте сценарий, чтобы создать озвучку.",
         variant: "destructive"
       });
       return;
@@ -40,7 +40,7 @@ const SoundSection = () => {
       id: `vo_${scene.id}`,
       type: 'voiceover',
       sceneId: scene.id,
-      name: `Voiceover ${index + 1}`,
+      name: `Озвучка ${index + 1}`,
       audioUrl: AUDIO_PRESETS.voiceover[selectedVoice],
       duration: scene.duration,
       volume: voiceVolume[0],
@@ -62,8 +62,8 @@ const SoundSection = () => {
     setVoicePrompt('');
 
     toast({
-      title: "Voiceover Generated",
-      description: "AI voiceovers have been created for all scenes!",
+      title: "Озвучка создана",
+      description: "ИИ-озвучка создана для всех сцен!",
     });
   };
 
@@ -74,7 +74,7 @@ const SoundSection = () => {
     const musicTrack = {
       id: `music_${Date.now()}`,
       type: 'music',
-      name: `Background Music - ${MUSIC_GENRES.find(g => g.value === selectedGenre)?.label}`,
+      name: `Фоновая музыка — ${MUSIC_GENRES.find(g => g.value === selectedGenre)?.label}`,
       audioUrl: AUDIO_PRESETS.music[selectedGenre],
       duration: currentProject.script?.scenes?.reduce((sum, scene) => sum + scene.duration, 0) || 30,
       volume: musicVolume[0],
@@ -96,8 +96,8 @@ const SoundSection = () => {
     setMusicPrompt('');
 
     toast({
-      title: "Music Generated",
-      description: "Background music has been created!",
+      title: "Музыка создана",
+      description: "Фоновая музыка создана!",
     });
   };
 
@@ -115,8 +115,8 @@ const SoundSection = () => {
     setIsGenerating(false);
 
     toast({
-      title: "Project Finalized!",
-      description: "Your animation is complete and ready for export!",
+      title: "Проект завершён!",
+      description: "Анимация готова к экспорту!",
     });
   };
 
@@ -162,8 +162,8 @@ const SoundSection = () => {
     setDraggedClip(null);
 
     toast({
-      title: "Audio Clip Moved",
-      description: `${draggedClip.name} repositioned to ${Math.round(newStartTime)}s`,
+      title: "Аудиоклип перемещён",
+      description: `${draggedClip.name} перемещён на ${Math.round(newStartTime)} с`,
     });
   };
 
@@ -174,7 +174,7 @@ const SoundSection = () => {
   };
 
   if (!currentProject) {
-    return <div className="p-6 text-white">No project selected</div>;
+    return <div className="p-6 text-white">Проект не выбран</div>;
   }
 
   const hasAnimation = currentProject.animation?.rendered;
@@ -187,17 +187,17 @@ const SoundSection = () => {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-white mb-2">Sound Design</h1>
-          <p className="text-gray-400">Add voiceovers, music, and sound effects</p>
+          <h1 className="text-2xl font-bold text-white mb-2">Звуковое оформление</h1>
+          <p className="text-gray-400">Добавьте озвучку, музыку и звуковые эффекты</p>
         </div>
         
         <div className="flex items-center space-x-3">
           <Badge variant="outline" className="border-teal-500/30 text-teal-300">
-            {currentProject.sound?.finalized ? 'Finalized' : 'In Progress'}
+            {currentProject.sound?.finalized ? 'Завершено' : 'В процессе'}
           </Badge>
           <Button variant="outline" className="border-white/20 text-white hover:bg-white/10">
             <Download className="h-4 w-4 mr-2" />
-            Export Audio
+            Экспорт звука
           </Button>
         </div>
       </div>
@@ -209,7 +209,7 @@ const SoundSection = () => {
             <CardHeader>
               <CardTitle className="text-white flex items-center">
                 <Play className="h-5 w-5 mr-2 text-teal-400" />
-                Video Preview
+                Видео-просмотр
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -221,8 +221,8 @@ const SoundSection = () => {
                         <div className="h-16 w-16 bg-teal-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
                           <Play className="h-8 w-8 text-teal-400" />
                         </div>
-                        <p className="text-white text-lg mb-2">Animation Preview</p>
-                        <p className="text-gray-400">Click play to preview with sound</p>
+                        <p className="text-white text-lg mb-2">Предпросмотр анимации</p>
+                        <p className="text-gray-400">Нажмите воспроизведение, чтобы посмотреть со звуком</p>
                       </div>
                     </div>
                   </div>
@@ -233,7 +233,7 @@ const SoundSection = () => {
                       className="bg-teal-500 hover:bg-teal-600 text-white"
                     >
                       {isPlaying ? <Pause className="h-4 w-4 mr-2" /> : <Play className="h-4 w-4 mr-2" />}
-                      {isPlaying ? 'Pause' : 'Play'}
+                      {isPlaying ? 'Пауза' : 'Воспроизвести'}
                     </Button>
                   </div>
                 </div>
@@ -241,8 +241,8 @@ const SoundSection = () => {
                 <div className="aspect-video bg-white/5 rounded-lg flex items-center justify-center">
                   <div className="text-center">
                     <Volume2 className="h-12 w-12 text-gray-500 mx-auto mb-4" />
-                    <h3 className="text-lg font-semibold text-white mb-2">No Animation Available</h3>
-                    <p className="text-gray-400">Complete the animation first to add sound</p>
+                    <h3 className="text-lg font-semibold text-white mb-2">Анимация недоступна</h3>
+                    <p className="text-gray-400">Сначала завершите анимацию, чтобы добавить звук</p>
                   </div>
                 </div>
               )}
@@ -252,7 +252,7 @@ const SoundSection = () => {
           {/* Audio Timeline */}
           <Card className="bg-[#161616]/60 backdrop-blur-xl border-white/10 mt-6">
             <CardHeader>
-              <CardTitle className="text-white">Audio Timeline</CardTitle>
+              <CardTitle className="text-white">Аудио-дорожка</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               {/* Voiceover Track */}
@@ -260,7 +260,7 @@ const SoundSection = () => {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-2">
                     <Mic className="h-4 w-4 text-blue-400" />
-                    <span className="text-white text-sm">Voiceovеr</span>
+                    <span className="text-white text-sm">Озвучка</span>
                   </div>
                   <div className="flex items-center space-x-2">
                     <Volume2 className="h-3 w-3 text-gray-400" />
@@ -291,13 +291,13 @@ const SoundSection = () => {
                           onDragStart={(e) => handleDragStart(e, track)}
                         >
                           <GripHorizontal className="h-3 w-3 text-blue-300 opacity-0 group-hover:opacity-100 transition-opacity mr-1" />
-                          <span className="text-xs text-blue-300 truncate">VO {index + 1}</span>
+                          <span className="text-xs text-blue-300 truncate">ОЗ {index + 1}</span>
                         </div>
                       );
                     })
                   ) : (
                     <div className="flex items-center justify-center h-full">
-                      <span className="text-gray-500 text-xs">No voiceover tracks - drop here to position</span>
+                      <span className="text-gray-500 text-xs">Нет дорожек озвучки — перетащите сюда для позиционирования</span>
                     </div>
                   )}
                 </div>
@@ -308,7 +308,7 @@ const SoundSection = () => {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-2">
                     <Music className="h-4 w-4 text-green-400" />
-                    <span className="text-white text-sm">Music</span>
+                    <span className="text-white text-sm">Музыка</span>
                   </div>
                   <div className="flex items-center space-x-2">
                     <Volume2 className="h-3 w-3 text-gray-400" />
@@ -345,7 +345,7 @@ const SoundSection = () => {
                     })
                   ) : (
                     <div className="flex items-center justify-center h-full">
-                      <span className="text-gray-500 text-xs">No music tracks - drop here to position</span>
+                      <span className="text-gray-500 text-xs">Нет музыкальных дорожек — перетащите сюда для позиционирования</span>
                     </div>
                   )}
                 </div>
@@ -355,10 +355,10 @@ const SoundSection = () => {
               <div className="space-y-2">
                 <div className="flex items-center space-x-2">
                   <Zap className="h-4 w-4 text-yellow-400" />
-                  <span className="text-white text-sm">Sound Effects</span>
+                  <span className="text-white text-sm">Звуковые эффекты</span>
                 </div>
                 <div className="h-12 bg-white/5 rounded border border-white/10 flex items-center justify-center">
-                  <span className="text-gray-500 text-xs">coming soon...</span>
+                  <span className="text-gray-500 text-xs">скоро...</span>
                 </div>
               </div>
 
@@ -368,7 +368,7 @@ const SoundSection = () => {
                   {Array.from({ length: Math.ceil(totalDuration / 5) + 1 }, (_, i) => (
                     <div key={i} className="flex flex-col items-center">
                       <div className="h-1 w-px bg-gray-400"></div>
-                      <span className="text-xs text-gray-400 mt-1">{i * 5}s</span>
+                      <span className="text-xs text-gray-400 mt-1">{i * 5}с</span>
                     </div>
                   ))}
                 </div>
@@ -384,12 +384,12 @@ const SoundSection = () => {
             <CardHeader>
               <CardTitle className="text-white flex items-center">
                 <Mic className="h-5 w-5 mr-2 text-blue-400" />
-                Voiceover
+                Озвучка
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <label className="text-sm text-gray-300 mb-2 block">Voice Character</label>
+                <label className="text-sm text-gray-300 mb-2 block">Голос персонажа</label>
                 <Select value={selectedVoice} onValueChange={setSelectedVoice}>
                   <SelectTrigger className="bg-white/5 border-white/20 text-white">
                     <SelectValue />
@@ -407,12 +407,12 @@ const SoundSection = () => {
               <div>
                 <label className="text-sm text-gray-300 mb-2 block flex items-center">
                   <MessageSquare className="h-3 w-3 mr-1" />
-                  Voice Generation Prompt
+                  Запрос для генерации голоса
                 </label>
                 <Input
                   value={voicePrompt}
                   onChange={(e) => setVoicePrompt(e.target.value)}
-                  placeholder="e.g., energetic and friendly tone..."
+                  placeholder="например: энергичный и дружелюбный тон..."
                   className="bg-white/5 border-white/20 text-white placeholder-gray-500"
                 />
               </div>
@@ -423,14 +423,14 @@ const SoundSection = () => {
                 className="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white border-0"
               >
                 <Mic className="h-4 w-4 mr-2" />
-                Generate Voice-over
+                Сгенерировать озвучку
               </Button>
 
               {hasVoiceover && (
                 <div className="text-xs text-green-400 bg-green-500/10 p-2 rounded border border-green-500/20">
-                  ✓ {currentProject.sound.voiceover.length} voiceover tracks generated
+                  ✓ {currentProject.sound.voiceover.length} дорожек озвучки создано
                   <br />
-                  <span className="text-gray-400">Drag clips in timeline to reposition</span>
+                  <span className="text-gray-400">Перетащите клипы на таймлайне, чтобы изменить позицию</span>
                 </div>
               )}
             </CardContent>
@@ -441,12 +441,12 @@ const SoundSection = () => {
             <CardHeader>
               <CardTitle className="text-white flex items-center">
                 <Music className="h-5 w-5 mr-2 text-green-400" />
-                Background Music
+                Фоновая музыка
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <label className="text-sm text-gray-300 mb-2 block">Music Genre</label>
+                <label className="text-sm text-gray-300 mb-2 block">Жанр музыки</label>
                 <Select value={selectedGenre} onValueChange={setSelectedGenre}>
                   <SelectTrigger className="bg-white/5 border-white/20 text-white">
                     <SelectValue />
@@ -464,12 +464,12 @@ const SoundSection = () => {
               <div>
                 <label className="text-sm text-gray-300 mb-2 block flex items-center">
                   <MessageSquare className="h-3 w-3 mr-1" />
-                  Music Generation Prompt
+                  Запрос для генерации музыки
                 </label>
                 <Input
                   value={musicPrompt}
                   onChange={(e) => setMusicPrompt(e.target.value)}
-                  placeholder="e.g., epic orchestral, upbeat synthwave..."
+                  placeholder="например: эпичный оркестр, бодрый синтвейв..."
                   className="bg-white/5 border-white/20 text-white placeholder-gray-500"
                 />
               </div>
@@ -480,14 +480,14 @@ const SoundSection = () => {
                 className="w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white border-0"
               >
                 <Music className="h-4 w-4 mr-2" />
-                Generate Music
+                Сгенерировать музыку
               </Button>
 
               {hasMusic && (
                 <div className="text-xs text-green-400 bg-green-500/10 p-2 rounded border border-green-500/20">
-                  ✓ Background music generated
+                  ✓ Фоновая музыка создана
                   <br />
-                  <span className="text-gray-400">Drag clips in timeline to reposition</span>
+                  <span className="text-gray-400">Перетащите клипы на таймлайне, чтобы изменить позицию</span>
                 </div>
               )}
             </CardContent>
@@ -497,8 +497,8 @@ const SoundSection = () => {
           <Card className="bg-gradient-to-r from-teal-500/10 to-purple-500/10 border-teal-400/30 backdrop-blur-xl">
             <CardContent className="p-6">
               <div className="text-center space-y-4">
-                <h3 className="text-lg font-semibold text-white">Ready to Export?</h3>
-                <p className="text-gray-300 text-sm">Finalize your animation with all audio tracks</p>
+                <h3 className="text-lg font-semibold text-white">Готовы к экспорту?</h3>
+                <p className="text-gray-300 text-sm">Завершите анимацию со всеми аудиодорожками</p>
                 
                 <Button 
                   onClick={handleFinalizeExport}
@@ -506,14 +506,14 @@ const SoundSection = () => {
                   className="w-full bg-gradient-to-r from-teal-500 to-purple-500 hover:from-teal-600 hover:to-purple-600 text-white border-0"
                 >
                   <Send className="h-4 w-4 mr-2" />
-                  Finalize & Export
+                  Завершить и экспортировать
                 </Button>
 
                 {isGenerating && (
                   <div className="text-center py-2">
                     <div className="inline-flex items-center space-x-2 text-teal-400">
                       <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-teal-400"></div>
-                      <span className="text-sm">Processing final export...</span>
+                      <span className="text-sm">Выполняется финальный экспорт...</span>
                     </div>
                   </div>
                 )}

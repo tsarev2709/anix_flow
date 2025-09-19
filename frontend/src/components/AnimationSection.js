@@ -106,8 +106,8 @@ const AnimationSection = ({ setActiveTab }) => {
     updateProject(updatedProject);
 
     toast({
-      title: "Keyframe Added",
-      description: "New keyframe has been added to the timeline.",
+      title: "Кадр добавлен",
+      description: "Новый ключевой кадр добавлен на таймлайн.",
     });
   };
 
@@ -135,8 +135,8 @@ const AnimationSection = ({ setActiveTab }) => {
   const handleModifyKeyframeWithPrompt = async (sceneId, keyframeId) => {
     if (!modifyPrompt.trim() && modifyImages.length === 0) {
       toast({
-        title: "Input Required",
-        description: "Please enter a modification prompt or upload an image.",
+        title: "Нужно заполнить поля",
+        description: "Введите запрос на изменение или загрузите изображение.",
         variant: "destructive"
       });
       return;
@@ -215,8 +215,8 @@ const AnimationSection = ({ setActiveTab }) => {
     setModifyImages([]);
 
     toast({
-      title: "Frame Modified",
-      description: modifyPrompt ? `Frame updated based on prompt: "${modifyPrompt}"` : "Frame updated with uploaded file",
+      title: "Кадр изменён",
+      description: modifyPrompt ? `Кадр обновлён по запросу: "${modifyPrompt}"` : "Кадр обновлён загруженным файлом",
     });
   };
 
@@ -262,8 +262,8 @@ const AnimationSection = ({ setActiveTab }) => {
     setIsProcessing(false);
 
     toast({
-      title: "Frame Upscaled",
-      description: "Frame has been upscaled.",
+      title: "Кадр улучшен",
+      description: "Кадр увеличен в разрешении.",
     });
   };
 
@@ -286,8 +286,8 @@ const AnimationSection = ({ setActiveTab }) => {
     setSelectedKeyframe(null);
 
     toast({
-      title: "Frame Deleted",
-      description: "The frame has been removed from the timeline.",
+      title: "Кадр удалён",
+      description: "Кадр удалён с таймлайна.",
     });
   };
 
@@ -317,8 +317,8 @@ const AnimationSection = ({ setActiveTab }) => {
     setHistoryKeyframeId(null);
 
     toast({
-      title: "Frame Version Restored",
-      description: "Frame has been reverted to the selected version.",
+      title: "Версия кадра восстановлена",
+      description: "Кадр восстановлен к выбранной версии.",
     });
   };
 
@@ -353,8 +353,8 @@ const AnimationSection = ({ setActiveTab }) => {
     updateProject(updatedProject);
 
     toast({
-      title: "Interpolation Added",
-      description: "Interpolated frames have been generated.",
+      title: "Интерполяция добавлена",
+      description: "Созданы интерполированные кадры.",
     });
   };
 
@@ -416,8 +416,8 @@ const AnimationSection = ({ setActiveTab }) => {
     setGoLivePrompt('');
 
     toast({
-      title: "Scene Animated",
-      description: "Keyframe animated based on prompt.",
+      title: "Сцена анимирована",
+      description: "Ключевой кадр анимирован по запросу.",
     });
   };
 
@@ -453,8 +453,8 @@ const AnimationSection = ({ setActiveTab }) => {
     setRenderProgress(0);
 
     toast({
-      title: "Scene Rendered",
-      description: "Animation render completed successfully!",
+      title: "Сцена отрендерена",
+      description: "Рендер анимации успешно завершён!",
     });
   };
 
@@ -484,8 +484,8 @@ const AnimationSection = ({ setActiveTab }) => {
     setRenderProgress(0);
 
     toast({
-      title: "Full Video Rendered",
-      description: "Complete animation has been rendered!",
+      title: "Полный ролик отрендерен",
+      description: "Готова полная версия анимации!",
     });
     setActiveTab('sound');
   };
@@ -532,8 +532,8 @@ const AnimationSection = ({ setActiveTab }) => {
     updateProject(updatedProject);
 
     toast({
-      title: "Video Edited",
-      description: "Timeline and color settings applied.",
+      title: "Видео отредактировано",
+      description: "Таймлайн и цветовые настройки применены.",
     });
 
     setEditSceneId(null);
@@ -576,7 +576,7 @@ const AnimationSection = ({ setActiveTab }) => {
   }, [currentProject, updateProject]);
 
   if (!currentProject) {
-    return <div className="p-6 text-white">No project selected</div>;
+    return <div className="p-6 text-white">Проект не выбран</div>;
   }
 
   const hasStoryboard = currentProject.storyboard?.generated;
@@ -598,21 +598,21 @@ const AnimationSection = ({ setActiveTab }) => {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-white mb-2">Animation Timeline</h1>
-          <p className="text-gray-400">Create keyframes and animate your scenes</p>
+          <h1 className="text-2xl font-bold text-white mb-2">Таймлайн анимации</h1>
+          <p className="text-gray-400">Создавайте ключевые кадры и анимируйте сцены</p>
         </div>
         
         <div className="flex items-center space-x-3">
           <Badge variant="outline" className="border-teal-500/30 text-teal-300">
-            {currentProject.animation?.rendered ? 'Rendered' : 'In Progress'}
+            {currentProject.animation?.rendered ? 'Отрендерено' : 'В процессе'}
           </Badge>
           <Button variant="outline" className="border-white/20 text-white hover:bg-white/10">
             <History className="h-4 w-4 mr-2" />
-            History
+            История
           </Button>
           <Button variant="outline" className="border-white/20 text-white hover:bg-white/10">
             <Download className="h-4 w-4 mr-2" />
-            Export
+            Экспорт
           </Button>
         </div>
       </div>
@@ -621,10 +621,10 @@ const AnimationSection = ({ setActiveTab }) => {
         <Card className="bg-[#161616]/60 backdrop-blur-xl border-white/10 h-96 flex items-center justify-center">
           <div className="text-center">
             <Play className="h-12 w-12 text-gray-500 mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-white mb-2">No Storyboard Available</h3>
-            <p className="text-gray-400 mb-4">Create a storyboard first to start animating</p>
+            <h3 className="text-lg font-semibold text-white mb-2">Раскадровка отсутствует</h3>
+            <p className="text-gray-400 mb-4">Сначала создайте раскадровку, чтобы приступить к анимации</p>
             <Button onClick={() => setActiveTab('storyboard')} variant="outline" className="border-teal-500/30 text-teal-300">
-              Go to Storyboard
+              Перейти к раскадровке
             </Button>
           </div>
         </Card>
@@ -635,7 +635,7 @@ const AnimationSection = ({ setActiveTab }) => {
             <CardHeader>
               <CardTitle className="text-white flex items-center">
                 <Play className="h-5 w-5 mr-2 text-teal-400" />
-                Animation Timeline
+                Таймлайн анимации
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
@@ -644,15 +644,15 @@ const AnimationSection = ({ setActiveTab }) => {
                 return (
                 <div key={scene.id} className="space-y-3">
                   <div className="flex items-center justify-between">
-                    <h4 className="text-white font-medium">Scene {sceneIndex + 1}</h4>
+                    <h4 className="text-white font-medium">Сцена {sceneIndex + 1}</h4>
                     <div className="flex items-center space-x-2">
                       <div className="flex items-center space-x-1 text-xs text-gray-400">
-                        <span>ez mod</span>
+                        <span>упрощённый режим</span>
                         <Switch
                           checked={!isEzMode}
                           onCheckedChange={(checked) => handleToggleMode(scene.id, !checked)}
                         />
-                        <span>pro mod</span>
+                        <span>проф. режим</span>
                       </div>
                       {isEzMode ? (
                         <Button
@@ -661,7 +661,7 @@ const AnimationSection = ({ setActiveTab }) => {
                           className="bg-teal-500/20 hover:bg-teal-500/30 text-teal-300 border border-teal-500/30"
                         >
                           <RefreshCw className="h-3 w-3 mr-1" />
-                          Go Live
+                          Запустить
                         </Button>
                       ) : (
                         <Button
@@ -670,7 +670,7 @@ const AnimationSection = ({ setActiveTab }) => {
                           className="bg-teal-500/20 hover:bg-teal-500/30 text-teal-300 border border-teal-500/30"
                         >
                           <Plus className="h-3 w-3 mr-1" />
-                          Add Keyframe
+                          Добавить кадр
                         </Button>
                       )}
                       <Button
@@ -680,7 +680,7 @@ const AnimationSection = ({ setActiveTab }) => {
                         className="bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 border border-purple-500/30"
                       >
                         <Play className="h-3 w-3 mr-1" />
-                        Render Scene
+                        Отрендерить сцену
                       </Button>
                     </div>
                   </div>
@@ -703,7 +703,7 @@ const AnimationSection = ({ setActiveTab }) => {
                             {keyframe.image && (
                               <img
                                 src={keyframe.image}
-                                alt={`Keyframe ${index + 1}`}
+                                alt={`Ключевой кадр ${index + 1}`}
                                 className="w-full h-16 object-cover rounded mb-2"
                               />
                             )}
@@ -717,9 +717,9 @@ const AnimationSection = ({ setActiveTab }) => {
                             )}
                             <div className="text-xs text-center">
                               <div className={keyframe.type === 'keyframe' ? 'text-teal-300' : 'text-purple-300'}>
-                                {keyframe.type === 'keyframe' ? 'Keyframe' : 'Interpolated'}
+                                {keyframe.type === 'keyframe' ? 'Ключевой кадр' : 'Интерполировано'}
                               </div>
-                              <div className="text-gray-400">{keyframe.timestamp}s</div>
+                              <div className="text-gray-400">{keyframe.timestamp}с</div>
                             </div>
                             {selectedKeyframe?.keyframeId === keyframe.id && (
                               <div className="absolute -top-1 -right-1 h-3 w-3 bg-blue-400 rounded-full"></div>
@@ -745,7 +745,7 @@ const AnimationSection = ({ setActiveTab }) => {
                     <div className="bg-green-500/10 border border-green-500/30 rounded-lg p-3">
                       <div className="flex items-center space-x-2">
                         <div className="h-2 w-2 bg-green-400 rounded-full"></div>
-                        <span className="text-green-400 text-sm">Scene rendered successfully</span>
+                        <span className="text-green-400 text-sm">Сцена успешно отрендерена</span>
                         <div className="ml-auto flex space-x-2">
                           <Button
                             size="sm"
@@ -754,7 +754,7 @@ const AnimationSection = ({ setActiveTab }) => {
                             className="border-green-500/30 text-green-300"
                           >
                             <Play className="h-3 w-3 mr-1" />
-                            Preview
+                            Предпросмотр
                           </Button>
                           <Button
                             size="sm"
@@ -768,7 +768,7 @@ const AnimationSection = ({ setActiveTab }) => {
                             className="border-green-500/30 text-green-300"
                           >
                             <Edit className="h-3 w-3 mr-1" />
-                            Edit
+                            Редактировать
                           </Button>
                         </div>
                       </div>
@@ -782,14 +782,14 @@ const AnimationSection = ({ setActiveTab }) => {
               {isProcessing && (
                 <div className="bg-white/5 rounded-lg p-4 border border-white/10">
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-white text-sm">Rendering Animation...</span>
+                    <span className="text-white text-sm">Рендер анимации...</span>
                     <span className="text-teal-400 text-sm">{renderProgress}%</span>
                   </div>
                   <Progress value={renderProgress} className="h-2" />
                 </div>
               )}
 
-              {/* Render Full Video */}
+              {/* Отрендерить полный ролик */}
               <div className="flex justify-center pt-4">
                 <Button 
                   onClick={handleRenderFullVideo}
@@ -797,7 +797,7 @@ const AnimationSection = ({ setActiveTab }) => {
                   className="bg-gradient-to-r from-teal-500 to-purple-500 hover:from-teal-600 hover:to-purple-600 text-white border-0 px-8"
                 >
                   <Play className="h-4 w-4 mr-2" />
-                  Render Full Video
+                  Отрендерить полный ролик
                 </Button>
               </div>
             </CardContent>
@@ -808,14 +808,14 @@ const AnimationSection = ({ setActiveTab }) => {
             <Card className="bg-gradient-to-r from-teal-500/10 to-purple-500/10 border-teal-400/30 backdrop-blur-xl">
               <CardContent className="p-6">
                 <div className="text-center">
-                  <h3 className="text-lg font-semibold text-white mb-2">Animation Complete!</h3>
-                  <p className="text-gray-300 mb-4">Ready to add sound and finalize your project?</p>
+                  <h3 className="text-lg font-semibold text-white mb-2">Анимация готова!</h3>
+                  <p className="text-gray-300 mb-4">Готовы добавить звук и завершить проект?</p>
                   <Button 
                     onClick={() => setActiveTab('sound')}
                     className="bg-gradient-to-r from-teal-500 to-purple-500 hover:from-teal-600 hover:to-purple-600 text-white border-0"
                   >
                     <Send className="h-4 w-4 mr-2" />
-                    Add Sound
+                    Добавить звук
                   </Button>
                 </div>
               </CardContent>
@@ -830,7 +830,7 @@ const AnimationSection = ({ setActiveTab }) => {
           <DialogHeader>
             <DialogTitle className="text-white flex items-center">
               <Play className="h-5 w-5 mr-2 text-green-400" />
-              Video Preview
+              Видео-просмотр
             </DialogTitle>
           </DialogHeader>
           {previewUrl && (
@@ -861,7 +861,7 @@ const AnimationSection = ({ setActiveTab }) => {
             <DialogHeader>
               <DialogTitle className="text-white flex items-center">
                 <Edit className="h-5 w-5 mr-2 text-green-400" />
-                Edit Video
+                Редактирование видео
               </DialogTitle>
             </DialogHeader>
             {editScene && (
@@ -892,7 +892,7 @@ const AnimationSection = ({ setActiveTab }) => {
                         onDragOver={(e) => e.preventDefault()}
                         className="bg-white/10 text-white px-2 py-1 rounded relative cursor-move"
                       >
-                        {seg.start.toFixed(1)}-{seg.end.toFixed(1)}s
+                        {seg.start.toFixed(1)}-{seg.end.toFixed(1)}с
                         <button
                           type="button"
                           onClick={() => handleDeleteSegment(idx)}
@@ -912,7 +912,7 @@ const AnimationSection = ({ setActiveTab }) => {
                   </Button>
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm text-gray-300">Filter Preset</label>
+                  <label className="text-sm text-gray-300">Предустановка фильтра</label>
                   <Select value={presetName} onValueChange={applyPreset}>
                     <SelectTrigger className="bg-white/5 border-white/20 text-white">
                       <SelectValue />
@@ -929,11 +929,11 @@ const AnimationSection = ({ setActiveTab }) => {
                         </SelectItem>
                       ))}
                       <SelectItem value="Custom" className="text-white focus:bg-white/10">
-                        Custom
+                        Пользовательский
                       </SelectItem>
                     </SelectContent>
                   </Select>
-                  <label className="text-sm text-gray-300">Brightness</label>
+                  <label className="text-sm text-gray-300">Яркость</label>
                   <input
                     type="range"
                     min="0"
@@ -943,7 +943,7 @@ const AnimationSection = ({ setActiveTab }) => {
                     onInput={(e) => handleFilterChange('brightness', Number(e.target.value))}
                     className="w-full"
                   />
-                  <label className="text-sm text-gray-300">Contrast</label>
+                  <label className="text-sm text-gray-300">Контраст</label>
                   <input
                     type="range"
                     min="0"
@@ -953,7 +953,7 @@ const AnimationSection = ({ setActiveTab }) => {
                     onInput={(e) => handleFilterChange('contrast', Number(e.target.value))}
                     className="w-full"
                   />
-                  <label className="text-sm text-gray-300">Saturation</label>
+                  <label className="text-sm text-gray-300">Насыщенность</label>
                   <input
                     type="range"
                     min="0"
@@ -965,13 +965,13 @@ const AnimationSection = ({ setActiveTab }) => {
                   />
                   <Accordion type="single" collapsible className="w-full text-white">
                     <AccordionItem value="advanced">
-                      <AccordionTrigger className="text-sm">Advanced Settings</AccordionTrigger>
+                      <AccordionTrigger className="text-sm">Расширенные настройки</AccordionTrigger>
                       <AccordionContent className="space-y-2">
                         <div className="flex space-x-2">
                           <Input
                             value={newPresetName}
                             onChange={(e) => setNewPresetName(e.target.value)}
-                            placeholder="Preset name"
+                            placeholder="Название пресета"
                             className="bg-black/20 text-white"
                           />
                           <Button
@@ -982,7 +982,7 @@ const AnimationSection = ({ setActiveTab }) => {
                             Save
                           </Button>
                         </div>
-                        <label className="text-sm text-gray-300">Hue</label>
+                        <label className="text-sm text-gray-300">Оттенок</label>
                         <input
                           type="range"
                           min="0"
@@ -992,7 +992,7 @@ const AnimationSection = ({ setActiveTab }) => {
                           onInput={(e) => handleFilterChange('hue', Number(e.target.value))}
                           className="w-full"
                         />
-                        <label className="text-sm text-gray-300">Sepia</label>
+                        <label className="text-sm text-gray-300">Сепия</label>
                         <input
                           type="range"
                           min="0"
@@ -1002,7 +1002,7 @@ const AnimationSection = ({ setActiveTab }) => {
                           onInput={(e) => handleFilterChange('sepia', Number(e.target.value))}
                           className="w-full"
                         />
-                        <label className="text-sm text-gray-300">Blur</label>
+                        <label className="text-sm text-gray-300">Размытие</label>
                         <input
                           type="range"
                           min="0"
@@ -1012,7 +1012,7 @@ const AnimationSection = ({ setActiveTab }) => {
                           onInput={(e) => handleFilterChange('blur', Number(e.target.value))}
                           className="w-full"
                         />
-                        <label className="text-sm text-gray-300">Grayscale</label>
+                        <label className="text-sm text-gray-300">Чёрно-белый</label>
                         <input
                           type="range"
                           min="0"
@@ -1022,7 +1022,7 @@ const AnimationSection = ({ setActiveTab }) => {
                           onInput={(e) => handleFilterChange('grayscale', Number(e.target.value))}
                           className="w-full"
                         />
-                        <label className="text-sm text-gray-300">Invert</label>
+                        <label className="text-sm text-gray-300">Инверсия</label>
                         <input
                           type="range"
                           min="0"
@@ -1057,7 +1057,7 @@ const AnimationSection = ({ setActiveTab }) => {
                     Apply Edits
                   </Button>
                 </div>
-                <label className="text-sm text-gray-300">Brightness</label>
+                <label className="text-sm text-gray-300">Яркость</label>
                 <input
                   type="range"
                   min="0"
@@ -1066,7 +1066,7 @@ const AnimationSection = ({ setActiveTab }) => {
                   onChange={(e) => handleFilterChange('brightness', Number(e.target.value))}
                   className="w-full"
                 />
-                <label className="text-sm text-gray-300">Contrast</label>
+                <label className="text-sm text-gray-300">Контраст</label>
                 <input
                   type="range"
                   min="0"
@@ -1075,7 +1075,7 @@ const AnimationSection = ({ setActiveTab }) => {
                   onChange={(e) => handleFilterChange('contrast', Number(e.target.value))}
                   className="w-full"
                 />
-                <label className="text-sm text-gray-300">Saturation</label>
+                <label className="text-sm text-gray-300">Насыщенность</label>
                 <input
                   type="range"
                   min="0"
@@ -1084,7 +1084,7 @@ const AnimationSection = ({ setActiveTab }) => {
                   onChange={(e) => handleFilterChange('saturation', Number(e.target.value))}
                   className="w-full"
                 />
-                <label className="text-sm text-gray-300">Hue</label>
+                <label className="text-sm text-gray-300">Оттенок</label>
                 <input
                   type="range"
                   min="0"
@@ -1093,7 +1093,7 @@ const AnimationSection = ({ setActiveTab }) => {
                   onChange={(e) => handleFilterChange('hue', Number(e.target.value))}
                   className="w-full"
                 />
-                <label className="text-sm text-gray-300">Sepia</label>
+                <label className="text-sm text-gray-300">Сепия</label>
                 <input
                   type="range"
                   min="0"
@@ -1102,7 +1102,7 @@ const AnimationSection = ({ setActiveTab }) => {
                   onChange={(e) => handleFilterChange('sepia', Number(e.target.value))}
                   className="w-full"
                 />
-                <label className="text-sm text-gray-300">Blur</label>
+                <label className="text-sm text-gray-300">Размытие</label>
                 <input
                   type="range"
                   min="0"
@@ -1111,7 +1111,7 @@ const AnimationSection = ({ setActiveTab }) => {
                   onChange={(e) => handleFilterChange('blur', Number(e.target.value))}
                   className="w-full"
                 />
-                <label className="text-sm text-gray-300">Grayscale</label>
+                <label className="text-sm text-gray-300">Чёрно-белый</label>
                 <input
                   type="range"
                   min="0"
@@ -1120,7 +1120,7 @@ const AnimationSection = ({ setActiveTab }) => {
                   onChange={(e) => handleFilterChange('grayscale', Number(e.target.value))}
                   className="w-full"
                 />
-                <label className="text-sm text-gray-300">Invert</label>
+                <label className="text-sm text-gray-300">Инверсия</label>
                 <input
                   type="range"
                   min="0"
@@ -1150,7 +1150,7 @@ const AnimationSection = ({ setActiveTab }) => {
           <DialogHeader>
             <DialogTitle className="text-white flex items-center">
               <RefreshCw className="h-5 w-5 mr-2 text-teal-400" />
-              Go Live - Scene {goLiveSceneId ? currentProject.animation.scenes.findIndex(s => s.id === goLiveSceneId) + 1 : ''}
+              Онлайн-анимация — Сцена {goLiveSceneId ? currentProject.animation.scenes.findIndex(s => s.id === goLiveSceneId) + 1 : ''}
             </DialogTitle>
           </DialogHeader>
           {goLiveScene && goLiveKeyframe && (
@@ -1165,7 +1165,7 @@ const AnimationSection = ({ setActiveTab }) => {
               ) : (
                 <img
                   src={goLiveKeyframe.image}
-                  alt="Scene keyframe"
+                  alt="Ключевой кадр сцены"
                   className="w-full h-64 object-cover rounded border border-teal-400/50"
                   onLoad={(e) => setImageResolution(`${e.target.naturalWidth}x${e.target.naturalHeight}`)}
                 />
@@ -1178,7 +1178,7 @@ const AnimationSection = ({ setActiveTab }) => {
                   className="bg-yellow-500/20 hover:bg-yellow-500/30 text-yellow-300 border border-yellow-500/30"
                 >
                   <History className="h-3 w-3 mr-1" />
-                  History
+                  История
                 </Button>
                 <Button
                   size="sm"
@@ -1187,7 +1187,7 @@ const AnimationSection = ({ setActiveTab }) => {
                   className="bg-green-500/20 hover:bg-green-500/30 text-green-300 border border-green-500/30"
                 >
                   <ArrowUp className="h-3 w-3 mr-1" />
-                  Upscale
+                  Повысить качество
                 </Button>
                 <Button
                   size="sm"
@@ -1199,7 +1199,7 @@ const AnimationSection = ({ setActiveTab }) => {
                   }}
                   className="border-white/20 text-white hover:bg-white/10"
                 >
-                  Close
+                  Закрыть
                 </Button>
               </div>
               <div className="flex items-center space-x-2">
@@ -1207,7 +1207,7 @@ const AnimationSection = ({ setActiveTab }) => {
                 <Input
                   value={goLivePrompt}
                   onChange={(e) => setGoLivePrompt(e.target.value)}
-                  placeholder="Enter animation prompt..."
+                  placeholder="Введите запрос для анимации..."
                   className="bg-white/5 border-white/20 text-white placeholder-gray-500 flex-1"
                   onKeyPress={(e) => {
                     if (e.key === 'Enter') {
@@ -1222,7 +1222,7 @@ const AnimationSection = ({ setActiveTab }) => {
                   className="bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 border border-purple-500/30"
                 >
                   <Play className="h-3 w-3 mr-1" />
-                  Go Live
+                  Запустить
                 </Button>
               </div>
             </div>
@@ -1236,7 +1236,7 @@ const AnimationSection = ({ setActiveTab }) => {
           <DialogHeader>
             <DialogTitle className="text-white flex items-center">
               <Edit className="h-5 w-5 mr-2 text-blue-400" />
-              Frame Editor - Scene {selectedKeyframe ? currentProject.animation.scenes.findIndex(s => s.id === selectedKeyframe.sceneId) + 1 : ''}
+              Редактор кадра — Сцена {selectedKeyframe ? currentProject.animation.scenes.findIndex(s => s.id === selectedKeyframe.sceneId) + 1 : ''}
             </DialogTitle>
           </DialogHeader>
           {selectedKeyframe && currentKeyframe && (
@@ -1244,7 +1244,7 @@ const AnimationSection = ({ setActiveTab }) => {
               {currentKeyframe.type === 'keyframe' ? (
                 <img
                   src={currentKeyframe.image}
-                  alt="Selected keyframe"
+                  alt="Выбранный кадр"
                   className="w-full h-64 object-cover rounded border border-blue-400/50"
                   onLoad={(e) => setImageResolution(`${e.target.naturalWidth}x${e.target.naturalHeight}`)}
                 />
@@ -1264,7 +1264,7 @@ const AnimationSection = ({ setActiveTab }) => {
                   className="bg-yellow-500/20 hover:bg-yellow-500/30 text-yellow-300 border border-yellow-500/30"
                 >
                   <History className="h-3 w-3 mr-1" />
-                  History
+                  История
                 </Button>
                 <Button
                   size="sm"
@@ -1273,7 +1273,7 @@ const AnimationSection = ({ setActiveTab }) => {
                   className="bg-green-500/20 hover:bg-green-500/30 text-green-300 border border-green-500/30"
                 >
                   <ArrowUp className="h-3 w-3 mr-1" />
-                  Upscale
+                  Повысить качество
                 </Button>
                 <Button
                   size="sm"
@@ -1281,7 +1281,7 @@ const AnimationSection = ({ setActiveTab }) => {
                   className="bg-red-500/20 hover:bg-red-500/30 text-red-300 border border-red-500/30"
                 >
                   <Trash2 className="h-3 w-3 mr-1" />
-                  Delete
+                  Удалить
                 </Button>
                 <Button
                   size="sm"
@@ -1289,7 +1289,7 @@ const AnimationSection = ({ setActiveTab }) => {
                   onClick={() => { setSelectedKeyframe(null); setModifyPrompt(''); }}
                   className="border-white/20 text-white hover:bg-white/10"
                 >
-                  Close
+                  Закрыть
                 </Button>
               </div>
               <div className="flex items-center space-x-2">
@@ -1298,7 +1298,7 @@ const AnimationSection = ({ setActiveTab }) => {
                   <Input
                     value={modifyPrompt}
                     onChange={(e) => setModifyPrompt(e.target.value)}
-                    placeholder="Enter modification prompt..."
+                    placeholder="Введите запрос на изменение..."
                     className="bg-white/5 border-white/20 text-white placeholder-gray-500 w-full pr-8"
                     onKeyPress={(e) => {
                       if (e.key === 'Enter') {
@@ -1327,7 +1327,7 @@ const AnimationSection = ({ setActiveTab }) => {
                   disabled={isProcessing}
                   className="bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 border border-blue-500/30"
                 >
-                  Apply
+                  Применить
                 </Button>
               </div>
               {modifyImages.length > 0 && (
@@ -1342,7 +1342,7 @@ const AnimationSection = ({ setActiveTab }) => {
                       ) : (
                         <img
                           src={img}
-                          alt={`preview-${idx}`}
+                          alt={`предпросмотр-${idx}`}
                           className="h-12 w-12 object-cover rounded border border-white/20"
                         />
                       )}
@@ -1368,7 +1368,7 @@ const AnimationSection = ({ setActiveTab }) => {
         onClose={() => setHistoryKeyframeId(null)}
         history={historyKeyframe?.history || []}
         onRevert={(version) => handleRevertKeyframeToVersion(historyKeyframeId, version)}
-        title="Frame History"
+        title="История кадра"
       />
     </div>
   );
