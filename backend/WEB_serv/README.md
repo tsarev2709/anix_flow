@@ -20,6 +20,10 @@
    ```bash
    uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
    ```
+4. Запустите воркер Celery в отдельном терминале:
+   ```bash
+   celery -A app.celery_app worker --loglevel=info
+   ```
 
 ## Структура каталога
 ```
