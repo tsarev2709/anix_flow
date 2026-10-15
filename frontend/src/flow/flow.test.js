@@ -2,6 +2,7 @@ import React, { act } from 'react';
 import { createRoot } from 'react-dom/client';
 import { Simulate } from 'react-dom/test-utils';
 import FlowApp from './FlowApp';
+import { Variants } from './Results';
 import { newProject, inputKey, inputOf, restoreProject, countWords, validateProject } from './data';
 import { markdown } from './api';
 
@@ -67,6 +68,36 @@ describe('workbench workflow', () => {
     expect(container.textContent).toContain('Новая адаптация');
   });
 
+  test('comparison opens another variant and missing report prevents selection', async () => {
+    const p = newProject(true);
+    const scene = { id: 's1', title: 'Вопрос наставнику', duration: 45, speech: '', visual: '', purpose: 'Найти помощь', claim_ids: ['C1'], accent_ids: ['A1'], emotion: 'Доверие' };
+    p.result = { variants: ['Личный выбор', 'Контраст'].map((title, i) => ({ id: `v${i}`, title, approach: title, logline: title, rationale: 'Причина выбора', tradeoff: 'Нужна проверка', scenes: [{ ...scene }] })), reports: [] };
+    const props = { p, update: jest.fn(), fresh: true, reportsFresh: true, approved: true, busy: '', generate: jest.fn(), recheck: jest.fn(), setStage: jest.fn() };
+    await act(async () => root.render(<Variants {...props} review={false} />));
+    expect(container.textContent).toContain('Сравнение решений');
+    click(container.querySelector('.flow-table'), 'Контраст');
+    expect(container.querySelector('.concept-card h2').textContent).toBe('Контраст');
+    expect(click(container, 'Выбрать вариант').disabled).toBe(true);
+    await act(async () => root.render(<Variants {...props} review />));
+    expect(container.textContent).toContain('От основания к сцене');
+    expect(container.textContent).toContain('Вопрос наставнику');
+    expect(container.textContent).toContain('Нужен пересчёт');
+  });
+
+  test('prioritized questions navigate to source fields', async () => {
+    global.fetch = jest.fn(async () => ({ ok: true, json: async () => ({
+      findings: [{ code: 'missing_before', priority: 'question', stage: 'meaning', question: 'Что зритель уже знает?', reason: 'Нужна исходная точка.', item_id: '' }],
+      blockers: 0, questions: 1, speech_capacity_with_tolerance: 93, required_words_lower_bound: 0,
+    }) }));
+    await act(async () => root.render(<FlowApp />));
+    navigate(container, 'spec');
+    await act(async () => new Promise(resolve => setTimeout(resolve, 400)));
+    expect(container.textContent).toContain('Что зритель уже знает?');
+    click(container.querySelector('.readiness-card'), 'Открыть этап');
+    expect(container.querySelector('.stage-nav[aria-current="step"]').textContent).toContain('Смысловая задача');
+    expect(global.fetch).toHaveBeenCalledWith(expect.stringContaining('/diagnostics'), expect.objectContaining({ method: 'POST' }));
+  });
+
   test('brief approval enables variants, scene edits invalidate checks, source edits invalidate approval', async () => {
     const spec = { communication_goal: 'Задача', audience_start: 'Начало', target_change: 'Изменение', viewer_action: 'Задай вопрос наставнику.',
       main_message: 'Задавать вопросы совершенно нормально.', conflict: 'Стесняется попросить помощи', promise: 'Помощь рядом', structure: 'Выбор', rationale: 'Мотивация', evidence: [], assumptions: [], questions: [] };
@@ -76,6 +107,7 @@ describe('workbench workflow', () => {
     const reports = [{ variant_id: 'v1', duration: 45, words: 4, speech_seconds: 2, bad_sentences: [], checks: [{ code: 'duration', label: 'Хронометраж', status: 'pass', detail: '45 с', scene_id: '' }], passes: 1, failures: 0 }];
     global.fetch = jest.fn(async (url) => ({ ok: true, json: async () => url.endsWith('/brief')
       ? { spec, fingerprint: 'test-sha', mode: 'llm', model: 'test-model' }
+      : url.endsWith('/diagnostics') ? { findings: [], blockers: 0, questions: 0, speech_capacity_with_tolerance: 93, required_words_lower_bound: 0 }
       : { variants, reports, fingerprint: 'test-sha', mode: 'llm', model: 'test-model' } }));
     await act(async () => root.render(<FlowApp />));
     navigate(container, 'spec');
@@ -87,6 +119,12 @@ describe('workbench workflow', () => {
     await act(async () => { click(container, 'Создать варианты'); });
     expect(container.textContent).toContain('Один вопрос меняет первый день');
     const select = click(container, 'Выбрать вариант'); expect(select.disabled).toBe(false);
+    const links = container.querySelector('.scene-link-editor');
+    const linked = links.querySelector('input');
+    expect(linked.checked).toBe(true);
+    act(() => Simulate.change(linked, { target: { checked: false } }));
+    expect(links.querySelector('input').checked).toBe(false);
+    expect(container.textContent).toContain('пересчитать проверки');
     const speech = [...container.querySelectorAll('label')].find(l => l.textContent.includes('ПРОИЗНОСИМЫЙ ТЕКСТ')).querySelector('textarea');
     act(() => Simulate.change(speech, { target: { value: 'Задай первый вопрос.' } }));
     expect(container.textContent).toContain('пересчитать проверки');

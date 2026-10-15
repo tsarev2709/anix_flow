@@ -10,8 +10,9 @@ from starlette.concurrency import run_in_threadpool
 load_dotenv(Path(__file__).parents[1] / ".env", override=False)
 
 from . import documents, llm, storage
-from .engine import evidence_issues, fingerprint, prompt_for, review_variant, template_spec, template_variants
-from .models import GenerationRequest, ProjectSave, ReviewRequest, Spec, VariantsRequest, VariantSet
+from .diagnostics import diagnose
+from .engine import fingerprint, prompt_for, review_variant, template_spec, template_variants
+from .models import GenerationRequest, ProjectInput, ProjectSave, ReviewRequest, Spec, VariantsRequest, VariantSet
 
 app = FastAPI(title="Anix Flow · Dramaturgy API", version="0.2.0")
 origins = [origin.strip() for origin in os.getenv("FLOW_CORS_ORIGINS", "http://localhost:3000,http://127.0.0.1:3000,https://tsarev2709.github.io").split(",")]
@@ -55,16 +56,21 @@ async def upload(file: UploadFile = File(...)):
     return {"id": "src-" + uuid.uuid4().hex[:12], "name": name, "text": text, "warning": warning}
 
 
-def check_context(request: GenerationRequest):
-    length = len(prompt_for(request.project, "brief"))
+def check_context(prompt: str):
+    length = len(prompt)
     limit = int(os.getenv("FLOW_MAX_CONTEXT_CHARS", "60000"))
     if length > limit:
         raise HTTPException(413, f"Входные данные: {length} символов, лимит: {limit}. Выбери нужные фрагменты; данные не обрезаны.")
 
 
+@app.post("/api/flow/diagnostics")
+async def diagnostics(project: ProjectInput):
+    return {**diagnose(project), "fingerprint": fingerprint(project)}
+
+
 @app.post("/api/flow/brief")
 async def brief(request: GenerationRequest):
-    check_context(request)
+    check_context(prompt_for(request.project, "brief"))
     try:
         result = template_spec(request.project) if request.mode == "template" else await llm.generate(Spec, prompt_for(request.project, "brief"), request.model)
     except llm.ModelError as exc:
@@ -84,10 +90,11 @@ async def variants(request: VariantsRequest):
         raise HTTPException(409, "Сначала согласуй ТЗ на драматургию.")
     if request.fingerprint != fingerprint(request.project):
         raise HTTPException(409, "Входные данные изменились. Обнови и согласуй ТЗ.")
-    check_context(request)
-    issues = evidence_issues(request.project)
-    if issues:
-        raise HTTPException(409, "Уточни утверждения перед генерацией: " + "; ".join(issues))
+    check_context(prompt_for(request.project, "variants", request.spec))
+    diagnosis = diagnose(request.project)
+    if diagnosis["blockers"]:
+        raise HTTPException(409, "Устрани противоречия перед генерацией: " + "; ".join(
+            f["reason"] for f in diagnosis["findings"] if f["priority"] == "blocker"))
     try:
         result = template_variants(request.project, request.spec) if request.mode == "template" else await llm.generate(
             VariantSet, prompt_for(request.project, "variants", request.spec), request.model)
@@ -97,6 +104,7 @@ async def variants(request: VariantsRequest):
             import json
             repair = prompt_for(request.project, "repair_variants", request.spec) + "\nИсправь нарушения, сохранив смысл:\n" + json.dumps(
                 {"previous": result.model_dump(), "checks": reports}, ensure_ascii=False)
+            check_context(repair)
             result = await llm.generate(VariantSet, repair, request.model)
             reports = [review_variant(request.project, v) for v in result.variants]
     except llm.ModelError as exc:

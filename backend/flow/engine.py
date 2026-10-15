@@ -84,11 +84,13 @@ def review_variant(project: ProjectInput, variant: Variant) -> dict:
     missing = known_claims - used_claims
     invalid = used_claims - known_claims
     invalid_accents = used_accents - known_accents
+    missing_accents = known_accents - used_accents
     invalid_links = [a.id for a in project.accents if a.claim_id and a.claim_id not in known_claims]
     duplicate_scenes = len({s.id for s in variant.scenes}) != len(variant.scenes)
     checks.append(Check(code="coverage", label="Связь сцен со смыслами",
-                        status="fail" if missing or invalid or invalid_accents or invalid_links or duplicate_scenes else "pass",
+                        status="fail" if missing or missing_accents or invalid or invalid_accents or invalid_links or duplicate_scenes else "pass",
                         detail=f"Без сцен: {', '.join(sorted(missing)) or 'нет'}. "
+                               f"Акценты без сцен: {', '.join(sorted(missing_accents)) or 'нет'}. "
                                f"Неизвестные ссылки: {', '.join(sorted(invalid | invalid_accents | set(invalid_links))) or 'нет'}. "
                                f"Повтор ID сцен: {'да' if duplicate_scenes else 'нет'}. "
                                "Наличие ссылки не доказывает смысловое соответствие."))

@@ -227,3 +227,85 @@ async def test_compatible_provider_uses_structured_output(project, monkeypatch):
     monkeypatch.setenv("FLOW_LLM_PROVIDER", "compatible")
     monkeypatch.setenv("FLOW_LLM_BASE_URL", "http://localhost:1234/v1")
     assert (await llm.generate(Spec, "brief")).viewer_action == project.action
+
+
+def test_diagnostics_prioritize_conflicts_and_preserve_unknown(client, project):
+    project.before = ""
+    project.constraints.must_include = "Обязательная запрещённая фраза"
+    project.constraints.forbidden = "запрещённая фраза"
+    response = client.post("/api/flow/diagnostics", json=project.model_dump())
+    assert response.status_code == 200
+    data = response.json()
+    assert data["findings"][0]["code"] == "phrase_conflict"
+    assert data["blockers"] == 1
+    assert any(f["code"] == "missing_before" for f in data["findings"])
+    assert data["fingerprint"] == fingerprint(project)
+    assert project.before == ""
+
+
+def test_diagnostics_does_not_require_behavior_for_emotional_work(client, project):
+    project.effects = ["emotion"]
+    project.action = ""
+    findings = client.post("/api/flow/diagnostics", json=project.model_dump()).json()["findings"]
+    assert not any(f["code"] == "missing_action" for f in findings)
+    project.effects = ["action"]
+    findings = client.post("/api/flow/diagnostics", json=project.model_dump()).json()["findings"]
+    assert any(f["code"] == "missing_action" for f in findings)
+
+
+def test_impossible_mandatory_speech_blocks_before_model_call(client, project, monkeypatch):
+    async def must_not_call(*args, **kwargs):
+        pytest.fail("Contradictions must be found before a model request")
+    monkeypatch.setattr(llm, "generate", must_not_call)
+    project.constraints.must_include = " ".join(["слово"] * 200)
+    response = client.post("/api/flow/variants", json={"project": project.model_dump(),
+        "spec": template_spec(project).model_dump(), "approved": True, "fingerprint": fingerprint(project)})
+    assert response.status_code == 409
+    assert "200" in response.json()["detail"]
+
+
+def test_required_fragments_are_not_naively_summed(client, project):
+    project.constraints.duration = 10
+    project.constraints.tolerance = 0
+    project.constraints.silent_seconds = 1
+    phrase = " ".join(["слово"] * 15)
+    project.constraints.must_include = phrase + "\n" + phrase.upper() + "\n" + " ".join(["слово"] * 14)
+    data = client.post("/api/flow/diagnostics", json=project.model_dump()).json()
+    assert data["required_words_lower_bound"] == 15
+    assert not data["blockers"]
+
+
+def test_missing_accent_is_reported(project):
+    v = variant(project)
+    for scene in v.scenes:
+        scene.accent_ids = []
+    check = next(c for c in review_variant(project, v)["checks"] if c["code"] == "coverage")
+    assert check["status"] == "fail" and "A1" in check["detail"]
+
+
+def test_context_limit_counts_approved_spec(client, project, monkeypatch):
+    from flow.engine import prompt_for
+    spec = template_spec(project)
+    limit = len(prompt_for(project, "brief")) + 50
+    monkeypatch.setenv("FLOW_MAX_CONTEXT_CHARS", str(limit))
+    spec.rationale = "длинное обоснование " * 500
+    response = client.post("/api/flow/variants", json={"project": project.model_dump(), "mode": "template",
+        "spec": spec.model_dump(), "fingerprint": fingerprint(project), "approved": True})
+    assert response.status_code == 413
+
+
+def test_context_limit_counts_repair_payload(client, project, monkeypatch):
+    from flow.engine import prompt_for
+    spec = template_spec(project)
+    monkeypatch.setenv("FLOW_MAX_CONTEXT_CHARS", str(len(prompt_for(project, "variants", spec)) + 100))
+    calls = []
+    async def invalid_result(*args, **kwargs):
+        calls.append(args)
+        result = template_variants(project, spec)
+        result.variants[0].scenes[0].duration = 1
+        return result
+    monkeypatch.setattr(llm, "generate", invalid_result)
+    response = client.post("/api/flow/variants", json={"project": project.model_dump(),
+        "spec": spec.model_dump(), "fingerprint": fingerprint(project), "approved": True})
+    assert response.status_code == 413
+    assert len(calls) == 1
