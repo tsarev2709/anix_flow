@@ -1,29 +1,119 @@
-# Here are your Instructions
+# Anix Flow · Dramaturgy Workbench
 
-## GPT Script Generation MVP
+От задачи клиента и документов — к **ТЗ на драматургию**, затем к нескольким **вариантам сценария с проверяемыми ограничениями**.
 
-The script editor can now request fresh scene breakdowns from the backend, which proxies calls to the OpenAI API. To enable the new flow:
+Версия 0.2 сосредоточена на драматургии. Новый интерфейс — основной. Предыдущий доступен через `?legacy=1`; его данные в `animai_projects` сохраняются отдельно.
 
-1. Create `backend/.env` (or supply real environment variables) with the following values:
-   ```env
-   MONGO_URL=mongodb://localhost:27017
-   DB_NAME=anix_flow
-   OPENAI_API_KEY=sk-...
-   # Optionally override:
-   # OPENAI_MODEL=gpt-4o-mini
-   # OPENAI_API_BASE=https://api.openai.com/v1
-   ```
-2. Install backend dependencies and start the API server:
-   ```bash
-   cd backend
-   pip install -r requirements.txt
-   uvicorn server:app --reload
-   ```
-3. Start the frontend (default backend URL is `http://localhost:8000`):
-   ```bash
-   cd frontend
-   yarn install
-   yarn start
+## Быстрый запуск на Windows
+
+Нужны **Node.js 20+**, **Python 3.11+** и Ollama с подходящей моделью.
+
+1. Открой эту версию репозитория на компьютере:
+
+   ```powershell
+   git clone --branch codex/dramaturgy-workbench https://github.com/tsarev2709/anix_flow.git
+   cd anix_flow
    ```
 
-`ScriptSection` now POSTs to `/api/generate-script`, sending the user prompt and narrator choice. The backend validates the model response, normalises scene IDs and durations, and returns JSON that immediately populates the UI. Any failure along the way surfaces as a toast in the interface.
+2. Если `qwen3:8b` ещё не загружена, выполни `ollama pull qwen3:8b`.
+3. Запусти **`start-flow.cmd`** двойным щелчком. Первый запуск установит зависимости в проект. Откроется `http://127.0.0.1:3000`.
+4. В левом нижнем углу открой настройки движка и нажми **«Проверить соединение»**.
+
+Останутся два окна: API и интерфейс. Остановка — `Ctrl+C` в каждом. Если порты 3000 или 8000 заняты, останови старый экземпляр перед новым запуском.
+
+Лаунчер предназначен для PowerShell 5.1+. Его выполнение требует проверки на целевом Windows-компьютере. Linux-проверки покрывают API и React, но не Windows-процессы.
+
+## Маршрут проекта
+
+1. **Задача и материалы:** бриф, текстовые файлы, PDF с текстовым слоем, DOCX. Проверь извлечённый текст.
+2. **Смысловая задача:** аудитория, исходное состояние, целевое изменение, действие, критерий успеха, утверждения и основания.
+3. **Драматургическая система:** четыре слоя Онтотона, повествовательные решения, COM-B, голос, явные и неявные акценты.
+4. **Формат и ограничения:** длительность, допуск, темп речи, резерв без речи, диапазон слов в предложении, число вариантов, обязательные и запрещённые фразы.
+5. **ТЗ на драматургию:** LLM собирает структурированный результат. Отредактируй, проверь допущения и вопросы, согласуй.
+6. **Варианты:** разные подходы, обоснования, компромиссы. Каждая сцена связывается с задачей, смыслами и акцентами.
+7. **Проверка:** расчёты и буквальные проверки плюс редакторская оценка. После правок пересчитай отчёт.
+
+Изменение исходных данных снимает согласование. Изменение ТЗ делает сценарии устаревшими. Правка сцены снимает выбор варианта и делает отчёт устаревшим. При повторной генерации сохраняются последние 20 заменённых результатов.
+
+Недоступная модель не заменяется шаблоном автоматически. Режим **«Ручные шаблоны без LLM»** включается явно в настройках; результаты помечаются как заготовки.
+
+## Локальная модель
+
+Если `backend/.env` ещё нет, скопируй `backend/.env.flow.example`. Если файл существует, добавь нужные переменные `FLOW_`. После изменения перезапусти API.
+
+```dotenv
+FLOW_LLM_PROVIDER=ollama
+FLOW_LLM_BASE_URL=http://127.0.0.1:11434
+FLOW_LLM_MODEL=qwen3:8b
+FLOW_LLM_TIMEOUT=240
+FLOW_LLM_CONTEXT=32768
+FLOW_MAX_CONTEXT_CHARS=60000
+```
+
+Для LM Studio или другого совместимого сервера:
+
+```dotenv
+FLOW_LLM_PROVIDER=compatible
+FLOW_LLM_BASE_URL=http://127.0.0.1:1234/v1
+FLOW_LLM_MODEL=имя-загруженной-модели
+# FLOW_LLM_API_KEY=ключ-при-необходимости
+```
+
+Сервер должен поддерживать `response_format: json_schema`. Провайдер выбирается в `.env`, имя модели можно переопределить в интерфейсе. Ключ хранится в окружении API, не попадает в браузер или экспорт.
+
+Ollama вызывается через `/api/chat` с JSON Schema, `stream=false`, `think=false`. Ответ проверяется Pydantic. Неверная структура получает одну попытку исправления. Для сценариев предусмотрена ещё одна итерация исправления измеримых нарушений. Оставшиеся нарушения отображаются и мешают выбору варианта.
+
+Символьный лимит не гарантирует размещение в токеновом окне модели. При потере контекста сократи материалы или увеличь поддерживаемый контекст. Скорость, память и качество `qwen3:8b` нужно проверить на реальном брифе и целевом ПК.
+
+## Документы и сохранение
+
+- TXT, MD, CSV, JSON в UTF-8 читаются в браузере. PDF и DOCX — через настроенный API.
+- OCR, изображения, колонтитулы и комментарии не извлекаются. Порядок таблиц требует проверки.
+- Файл — до 12 МБ; извлечённый текст — до 120 000 символов; полный модельный контекст по умолчанию — до 60 000. Превышение даёт ошибку, без тихого обрезания.
+- Цитаты ТЗ проверяются на дословное наличие в источнике. Это проверка происхождения, не истинности.
+- Автосохранение: `localStorage`, ключ `anix_flow_workbench_v2`, в конкретном браузере и origin.
+- **Экспорт → JSON:** весь проект и история. Импорт создаёт отдельную копию и снимает согласование.
+- **Экспорт → Markdown:** контекст, ТЗ, сценарии, акценты, проверки и источники для редактора.
+- **Сохранить копию в локальный API:** резервная копия в `backend/.flow-data/projects.sqlite3`. Восстановление — в том же окне. Это явное сохранение, не фоновая синхронизация.
+
+Новый API не требует MongoDB, Redis или старых сервисов. По умолчанию он слушает только `127.0.0.1` и предназначен для одного локального пользователя. Для командного интернет-развёртывания отдельно нужны авторизация, изоляция проектов и серверное хранение.
+
+GitHub Pages поддерживает редактор и автосохранение. Доступ из HTTPS-страницы к локальному API зависит от браузера. Для локальной модели предпочтителен `start-flow.cmd`.
+
+## Ручной запуск / Linux / macOS
+
+```bash
+cd backend
+python -m venv .venv
+source .venv/bin/activate
+pip install -r requirements-flow.txt
+uvicorn flow.main:app --host 127.0.0.1 --port 8000
+```
+
+В другом терминале:
+
+```bash
+cd frontend
+npm ci --ignore-scripts --no-audit --no-fund
+PUBLIC_URL=/ HOST=127.0.0.1 BROWSER=none npm start
+```
+
+Контракт: `GET /api/flow/health`, `POST /api/flow/documents`, `POST /api/flow/brief`, `POST /api/flow/variants`, `POST /api/flow/review`, `GET /api/flow/projects`, `PUT /api/flow/projects/{id}`. Интерактивная схема: `http://127.0.0.1:8000/docs`.
+
+## Проверка разработки
+
+```bash
+cd backend
+pip install -r requirements-flow.txt pytest pytest-asyncio
+python -m pytest -q tests
+```
+
+```bash
+cd frontend
+CI=true npm test -- --watchAll=false --runInBand
+CI=true npm run build
+```
+
+CI проверяет API, React и сборку в PR. Тесты модели используют подставные HTTP-ответы и не проверяют художественное качество реальной LLM. CRA пока сохранён для совместимости.
+
+Подробнее: [фреймворк](docs/DRAMATURGY_FRAMEWORK.md), [следующие этапы](docs/ROADMAP.md).
