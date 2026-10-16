@@ -21,6 +21,7 @@ const result = z.object({ variants: z.array(variant), reports: z.array(report), 
   fingerprint: text, inputKey: text, specKey: text, reviewKey: text, created: text }).passthrough();
 
 export const projectSchema = z.object({
+  api_revisions: z.record(z.number().int().nonnegative()).default({}),
   id: text, title: text, client: text, task: text, audience: text, before: text, desired: text, action: text, success: text,
   claims: z.array(claim), sources: z.array(source), accents: z.array(accent),
   constraints: z.object({ duration: editableNumber, tolerance: editableNumber, wpm: editableNumber,

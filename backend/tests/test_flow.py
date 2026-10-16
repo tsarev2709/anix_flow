@@ -309,3 +309,50 @@ def test_context_limit_counts_repair_payload(client, project, monkeypatch):
         "spec": spec.model_dump(), "fingerprint": fingerprint(project), "approved": True})
     assert response.status_code == 413
     assert len(calls) == 1
+
+
+def test_backups_reject_stale_writes_and_preserve_revisions(client, project):
+    path = f"/api/flow/projects/{project.id}"
+    body = {"id": project.id, "data": {"title": "Первая версия"}}
+    saved = client.put(path, json=body).json()
+    assert saved["revision"] == 1
+    assert client.put(path, json=body).status_code == 409
+    body.update(expected_revision=1, data={"title": "Вторая версия"})
+    assert client.put(path, json=body).json()["revision"] == 2
+    body["data"]["title"] = "Устаревшая запись"
+    assert client.put(path, json=body).status_code == 409
+    assert client.get("/api/flow/projects").json()["projects"][0]["data"]["title"] == "Вторая версия"
+    revisions = client.get(path + "/revisions").json()["revisions"]
+    assert [r["revision"] for r in revisions] == [2, 1]
+    assert revisions[-1]["data"]["title"] == "Первая версия"
+
+
+def test_old_sqlite_database_upgrades_without_data_loss(client, project, tmp_path):
+    import json
+    import sqlite3
+    with sqlite3.connect(tmp_path / "projects.sqlite3") as db:
+        db.execute("CREATE TABLE projects (id TEXT PRIMARY KEY, updated TEXT NOT NULL, data TEXT NOT NULL)")
+        db.execute("INSERT INTO projects VALUES (?, ?, ?)", (project.id, "2026-10-15", json.dumps({"title": "Старая копия"})))
+    records = client.get("/api/flow/projects").json()["projects"]
+    assert records[0]["revision"] == 1
+    assert records[0]["data"]["title"] == "Старая копия"
+    saved = client.put(f"/api/flow/projects/{project.id}", json={"id": project.id, "data": {"title": "Новая"}, "expected_revision": 1})
+    assert saved.json()["revision"] == 2
+    assert len(client.get(f"/api/flow/projects/{project.id}/revisions").json()["revisions"]) == 2
+
+
+def test_concurrent_backups_have_one_winner(tmp_path, monkeypatch):
+    from concurrent.futures import ThreadPoolExecutor
+    from flow import storage
+    monkeypatch.setenv("FLOW_DATA_DIR", str(tmp_path))
+    storage.save("race", {"value": "initial"})
+    def write(value):
+        try:
+            storage.save("race", {"value": value}, expected_revision=1)
+            return "saved"
+        except storage.ConflictError:
+            return "conflict"
+    with ThreadPoolExecutor(max_workers=2) as pool:
+        results = list(pool.map(write, ["a", "b"]))
+    assert sorted(results) == ["conflict", "saved"]
+    assert len(storage.revisions("race")) == 2

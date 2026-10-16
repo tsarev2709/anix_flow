@@ -189,5 +189,6 @@ class Check(Model):
 
 
 class ProjectSave(Model):
+    expected_revision: int | None = Field(default=None, ge=0)
     id: str = Field(pattern=r"^[a-zA-Z0-9_-]{1,100}$")
     data: dict

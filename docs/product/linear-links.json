@@ -1,0 +1,587 @@
+{
+  "project": {
+    "id": "776720ab-b63f-4b31-81ee-ec8a0347062c",
+    "url": "https://linear.app/anixstudio/project/anix-flow-b0920cee9c85"
+  },
+  "milestones": {
+    "S01": {
+      "id": "efffdcb8-e82c-4728-a1ff-29725586acc7",
+      "name": "S01 · 2026-10-19—2026-10-25 · Бриф, рабочий обзор и сохранность данных",
+      "targetDate": "2026-10-25"
+    },
+    "S02": {
+      "id": "814448ce-44af-4c7f-8242-3438c4ec58e7",
+      "name": "S02 · 2026-10-26—2026-11-01 · Общее ТЗ и понятийный реестр",
+      "targetDate": "2026-11-01"
+    },
+    "S03": {
+      "id": "cc58f45e-ebf3-4e7a-9db2-1b8c00b0a604",
+      "name": "S03 · 2026-11-02—2026-11-08 · Варианты и полноценный редактор сцен",
+      "targetDate": "2026-11-08"
+    },
+    "S04": {
+      "id": "06c169f8-63d8-4f44-9dd4-69536eef80cd",
+      "name": "S04 · 2026-11-09—2026-11-15 · Согласование и цикл версий",
+      "targetDate": "2026-11-15"
+    },
+    "S05": {
+      "id": "9fc704c5-fb1d-4bf5-905f-c3a314c43f83",
+      "name": "S05 · 2026-11-16—2026-11-22 · Подробная режиссура и экспликация",
+      "targetDate": "2026-11-22"
+    },
+    "S06": {
+      "id": "c1f34934-4288-4629-b085-36d62eb4035f",
+      "name": "S06 · 2026-11-23—2026-11-29 · Референсы и персонажи",
+      "targetDate": "2026-11-29"
+    },
+    "S07": {
+      "id": "041ceb3b-c65b-408d-9b9c-fbaf43623a00",
+      "name": "S07 · 2026-11-30—2026-12-06 · Изображения по планам",
+      "targetDate": "2026-12-06"
+    },
+    "S08": {
+      "id": "ef2bd44a-d126-46f1-b0be-a3009b0cdb7e",
+      "name": "S08 · 2026-12-07—2026-12-13 · Видео-дубли и надёжные jobs",
+      "targetDate": "2026-12-13"
+    },
+    "S09": {
+      "id": "8498739a-3987-48f7-b9d3-2a0b022c1af3",
+      "name": "S09 · 2026-12-14—2026-12-20 · Цвет сцены и связанные производные",
+      "targetDate": "2026-12-20"
+    },
+    "S10": {
+      "id": "0b4ac9c7-85db-4e34-b31a-a5aa5f922da7",
+      "name": "S10 · 2026-12-21—2026-12-27 · Монтаж, звук, мастер и проверка надёжности",
+      "targetDate": "2026-12-27"
+    }
+  },
+  "documents": {
+    "E01": {
+      "id": "f8776424-3f93-40d7-8bf4-6f1dc0643083",
+      "title": "E01 · Заполнение брифа — CJM / USM",
+      "url": "https://linear.app/anixstudio/document/e01-zapolnenie-brifa-cjm-usm-2fe96ae7db68"
+    },
+    "E02": {
+      "id": "4dc7e3de-1d43-4df2-9a3f-380f774bed9b",
+      "title": "E02 · Общее ТЗ на драматургию и режиссуру — CJM / USM",
+      "url": "https://linear.app/anixstudio/document/e02-obshee-tz-na-dramaturgiyu-i-rezhissuru-cjm-usm-dfad5aa7396d"
+    },
+    "E03": {
+      "id": "b18288ac-815e-42d3-9efa-34cf75477a45",
+      "title": "E03 · Сценарий и варианты — CJM / USM",
+      "url": "https://linear.app/anixstudio/document/e03-scenarij-i-varianty-cjm-usm-ba541c4d843d"
+    },
+    "E04": {
+      "id": "90e18824-a416-427a-ac3d-e0a0b0c41a2b",
+      "title": "E04 · Согласование и правки — CJM / USM",
+      "url": "https://linear.app/anixstudio/document/e04-soglasovanie-i-pravki-cjm-usm-511d5d41bdca"
+    },
+    "E05": {
+      "id": "a135f72d-fd30-42c9-b516-55209e4aa204",
+      "title": "E05 · Новая версия сценария: цикл правок — CJM / USM",
+      "url": "https://linear.app/anixstudio/document/e05-novaya-versiya-scenariya-cikl-pravok-cjm-usm-e19471852719"
+    },
+    "E06": {
+      "id": "b8f7a8da-05e7-4366-a52c-0bd3151462cc",
+      "title": "E06 · Форма и подробное ТЗ на режиссуру — CJM / USM",
+      "url": "https://linear.app/anixstudio/document/e06-forma-i-podrobnoe-tz-na-rezhissuru-cjm-usm-7c91511423cb"
+    },
+    "E07": {
+      "id": "8cd75688-d038-4165-804e-c47f6a7e1658",
+      "title": "E07 · Экспликация — CJM / USM",
+      "url": "https://linear.app/anixstudio/document/e07-eksplikaciya-cjm-usm-47be0dd80f22"
+    },
+    "E08": {
+      "id": "63b6f70f-890d-4b4a-a581-797c7eea9ee4",
+      "title": "E08 · Экспликация и визуальные референсы — CJM / USM",
+      "url": "https://linear.app/anixstudio/document/e08-eksplikaciya-i-vizualnye-referensy-cjm-usm-a200db8e054e"
+    },
+    "E09": {
+      "id": "8338bf5d-3779-45c4-a079-b2ae3f117f4c",
+      "title": "E09 · Разработка и использование персонажей — CJM / USM",
+      "url": "https://linear.app/anixstudio/document/e09-razrabotka-i-ispolzovanie-personazhej-cjm-usm-dbf67af462db"
+    },
+    "E10": {
+      "id": "f41411f6-887e-49de-bfd0-a53370878e63",
+      "title": "E10 · Создание визуалов — CJM / USM",
+      "url": "https://linear.app/anixstudio/document/e10-sozdanie-vizualov-cjm-usm-141364926f51"
+    },
+    "E11": {
+      "id": "c302ccfb-da6e-42af-a246-33053f650aca",
+      "title": "E11 · Создание видео по планам — CJM / USM",
+      "url": "https://linear.app/anixstudio/document/e11-sozdanie-video-po-planam-cjm-usm-67bc9f6d1eed"
+    },
+    "E12": {
+      "id": "ed9db28d-eef9-4f9b-b34f-0ba07082c548",
+      "title": "E12 · Цветокоррекция сцены — CJM / USM",
+      "url": "https://linear.app/anixstudio/document/e12-cvetokorrekciya-sceny-cjm-usm-fcf52c398b1d"
+    },
+    "E13": {
+      "id": "56c6156c-a849-416c-9a25-4a006169e6bf",
+      "title": "E13 · Монтаж, звук и финальная выдача — CJM / USM",
+      "url": "https://linear.app/anixstudio/document/e13-montazh-zvuk-i-finalnaya-vydacha-cjm-usm-b93f565de693"
+    },
+    "E14": {
+      "id": "845cc9fc-c9c6-4cec-9ff3-eebf8fd9e195",
+      "title": "E14 · Страница работы над проектом — CJM / USM",
+      "url": "https://linear.app/anixstudio/document/e14-stranica-raboty-nad-proektom-cjm-usm-92a59533010c"
+    },
+    "E15": {
+      "id": "d04696a7-c97e-402a-960f-d615ecb24c31",
+      "title": "E15 · Платформа: БД, авторизация и стабильность — CJM / USM",
+      "url": "https://linear.app/anixstudio/document/e15-platforma-bd-avtorizaciya-i-stabilnost-cjm-usm-aa31474a0750"
+    },
+    "E16": {
+      "id": "cb8f1a4a-0b57-4a30-8f82-1a06348a6525",
+      "title": "E16 · Понятийный фреймворк и качество — CJM / USM",
+      "url": "https://linear.app/anixstudio/document/e16-ponyatijnyj-frejmvork-i-kachestvo-cjm-usm-52febad5b347"
+    },
+    "architecture": {
+      "id": "3b8abaa4-07b2-4662-bd42-9e2cedcd687f",
+      "title": "Архитектура: БД, версии, роли, LLM и медиа",
+      "url": "https://linear.app/anixstudio/document/arhitektura-bd-versii-roli-llm-i-media-1a874bbb12de"
+    },
+    "workspace": {
+      "id": "1c321052-60d9-420c-b3a8-f731597f79e4",
+      "title": "Страница проекта: UX, CJM и USM",
+      "url": "https://linear.app/anixstudio/document/stranica-proekta-ux-cjm-i-usm-8dd2090b3387"
+    },
+    "delivery": {
+      "id": "08929190-dc6a-4fc3-bd5e-39568558528a",
+      "title": "Разработка по неделям: спринты и правила приёмки",
+      "url": "https://linear.app/anixstudio/document/razrabotka-po-nedelyam-sprinty-i-pravila-priyomki-ceb165629437"
+    },
+    "index": {
+      "id": "c7ac98fb-cac8-4f15-9881-32ff11b416eb",
+      "title": "Начать здесь · Anix Flow: маршрут, эпики и документация",
+      "url": "https://linear.app/anixstudio/document/nachat-zdes-anix-flow-marshrut-epiki-i-dokumentaciya-fa33bc3dcc33"
+    }
+  },
+  "epics": {
+    "E01": {
+      "id": "AND-30",
+      "uuid": "008861d7-fa0b-4597-b5f0-dc3b39957e54",
+      "url": "https://linear.app/anixstudio/issue/AND-30/e01-zapolnenie-brifa"
+    },
+    "E02": {
+      "id": "AND-31",
+      "uuid": "e3cb3f39-1508-4013-a005-816c705c2942",
+      "url": "https://linear.app/anixstudio/issue/AND-31/e02-obshee-tz-na-dramaturgiyu-i-rezhissuru"
+    },
+    "E03": {
+      "id": "AND-32",
+      "uuid": "3a985b45-4c1c-4d9e-ac2e-3b15f59306a0",
+      "url": "https://linear.app/anixstudio/issue/AND-32/e03-scenarij-i-varianty"
+    },
+    "E04": {
+      "id": "AND-33",
+      "uuid": "5d5992df-e3ef-4bfa-8362-3c4e632ee7fc",
+      "url": "https://linear.app/anixstudio/issue/AND-33/e04-soglasovanie-i-pravki"
+    },
+    "E05": {
+      "id": "AND-34",
+      "uuid": "08dca18d-c3c7-4d56-bebd-4a61ea850766",
+      "url": "https://linear.app/anixstudio/issue/AND-34/e05-novaya-versiya-scenariya-cikl-pravok"
+    },
+    "E06": {
+      "id": "AND-35",
+      "uuid": "9d3e1afe-f0d3-4920-871c-5ade0ea50b08",
+      "url": "https://linear.app/anixstudio/issue/AND-35/e06-forma-i-podrobnoe-tz-na-rezhissuru"
+    },
+    "E07": {
+      "id": "AND-36",
+      "uuid": "f56e3bdf-4966-41f4-9028-e2fd05042dfd",
+      "url": "https://linear.app/anixstudio/issue/AND-36/e07-eksplikaciya"
+    },
+    "E08": {
+      "id": "AND-37",
+      "uuid": "6d52a6c9-590e-4da2-a209-cf9acffc8562",
+      "url": "https://linear.app/anixstudio/issue/AND-37/e08-eksplikaciya-i-vizualnye-referensy"
+    },
+    "E09": {
+      "id": "AND-38",
+      "uuid": "33c2194e-769a-45a5-9347-d199d0cc7005",
+      "url": "https://linear.app/anixstudio/issue/AND-38/e09-razrabotka-i-ispolzovanie-personazhej"
+    },
+    "E10": {
+      "id": "AND-39",
+      "uuid": "8a6fb74e-d232-4014-88dd-7451a78a6b58",
+      "url": "https://linear.app/anixstudio/issue/AND-39/e10-sozdanie-vizualov"
+    },
+    "E11": {
+      "id": "AND-40",
+      "uuid": "8f380791-162f-4cb7-9003-171f3c756a5d",
+      "url": "https://linear.app/anixstudio/issue/AND-40/e11-sozdanie-video-po-planam"
+    },
+    "E12": {
+      "id": "AND-41",
+      "uuid": "3e591333-7d5d-45c2-a95a-d698d71761f9",
+      "url": "https://linear.app/anixstudio/issue/AND-41/e12-cvetokorrekciya-sceny"
+    },
+    "E13": {
+      "id": "AND-42",
+      "uuid": "a210a511-7579-4316-a237-94d86284310b",
+      "url": "https://linear.app/anixstudio/issue/AND-42/e13-montazh-zvuk-i-finalnaya-vydacha"
+    },
+    "E14": {
+      "id": "AND-43",
+      "uuid": "432c0f4a-169d-4485-8be1-a5dbdb8f1e55",
+      "url": "https://linear.app/anixstudio/issue/AND-43/e14-stranica-raboty-nad-proektom"
+    },
+    "E15": {
+      "id": "AND-44",
+      "uuid": "a92ebe14-84f5-4719-960b-26c6c85b900d",
+      "url": "https://linear.app/anixstudio/issue/AND-44/e15-platforma-bd-avtorizaciya-i-stabilnost"
+    },
+    "E16": {
+      "id": "AND-45",
+      "uuid": "859ca6ea-08e5-450f-9c4d-ab09b60308a0",
+      "url": "https://linear.app/anixstudio/issue/AND-45/e16-ponyatijnyj-frejmvork-i-kachestvo"
+    }
+  },
+  "stories": {
+    "E01-US01": {
+      "id": "AND-46",
+      "uuid": "ec085d25-5e8b-40aa-b299-f169c85d0315",
+      "url": "https://linear.app/anixstudio/issue/AND-46/e01-us01-master-brifa-s-sohraneniem-otvetov",
+      "status": "Todo",
+      "milestone": "efffdcb8-e82c-4728-a1ff-29725586acc7"
+    },
+    "E01-US02": {
+      "id": "AND-47",
+      "uuid": "e043cc6b-23cd-4791-b6b0-24e023d3cfd9",
+      "url": "https://linear.app/anixstudio/issue/AND-47/e01-us02-izvlechenie-trebovanij-s-citatami-i-stranicami",
+      "status": "Backlog",
+      "milestone": "814448ce-44af-4c7f-8242-3438c4ec58e7"
+    },
+    "E01-US03": {
+      "id": "AND-48",
+      "uuid": "2abfcbc3-b553-4ace-acca-ee042f832d7b",
+      "url": "https://linear.app/anixstudio/issue/AND-48/e01-us03-utochneniya-s-vliyaniem-na-rezultat",
+      "status": "Todo",
+      "milestone": "efffdcb8-e82c-4728-a1ff-29725586acc7"
+    },
+    "E02-US01": {
+      "id": "AND-49",
+      "uuid": "c98f74dc-6894-4b93-b078-f81123442d9d",
+      "url": "https://linear.app/anixstudio/issue/AND-49/e02-us01-obshie-rezhissyorskie-principy-v-tz",
+      "status": "Backlog",
+      "milestone": "814448ce-44af-4c7f-8242-3438c4ec58e7"
+    },
+    "E02-US02": {
+      "id": "AND-50",
+      "uuid": "393b1963-cfa8-4048-8580-fdf707c56bdf",
+      "url": "https://linear.app/anixstudio/issue/AND-50/e02-us02-smyslovoj-pasport-p1-p8-i-shest-effektov",
+      "status": "Backlog",
+      "milestone": "814448ce-44af-4c7f-8242-3438c4ec58e7"
+    },
+    "E02-US03": {
+      "id": "AND-51",
+      "uuid": "84220509-062d-444c-822e-254079241a0c",
+      "url": "https://linear.app/anixstudio/issue/AND-51/e02-us03-soglasovanie-neizmenyaemogo-snimka-obshego-tz",
+      "status": "Backlog",
+      "milestone": "814448ce-44af-4c7f-8242-3438c4ec58e7"
+    },
+    "E03-US01": {
+      "id": "AND-52",
+      "uuid": "0da2639e-a7ad-45f7-9da3-d18d1cc8a64e",
+      "url": "https://linear.app/anixstudio/issue/AND-52/e03-us01-raznye-strategii-odnogo-scenarnogo-zadaniya",
+      "status": "Backlog",
+      "milestone": "cc58f45e-ebf3-4e7a-9db2-1b8c00b0a604"
+    },
+    "E03-US02": {
+      "id": "AND-53",
+      "uuid": "cfad7c02-deaa-4cfd-977f-41b6cadafac7",
+      "url": "https://linear.app/anixstudio/issue/AND-53/e03-us02-redaktor-sceny-i-struktury",
+      "status": "Backlog",
+      "milestone": "cc58f45e-ebf3-4e7a-9db2-1b8c00b0a604"
+    },
+    "E03-US03": {
+      "id": "AND-54",
+      "uuid": "ab8a8c48-1073-4fea-b5dd-76abf1649fc2",
+      "url": "https://linear.app/anixstudio/issue/AND-54/e03-us03-proverki-tajminga-i-fakticheskaya-probnaya-rech",
+      "status": "Backlog",
+      "milestone": "cc58f45e-ebf3-4e7a-9db2-1b8c00b0a604"
+    },
+    "E04-US01": {
+      "id": "AND-55",
+      "uuid": "5918e752-e110-4199-ab58-57f1d54c5475",
+      "url": "https://linear.app/anixstudio/issue/AND-55/e04-us01-kommentarii-privyazany-k-revizii-i-scene",
+      "status": "Backlog",
+      "milestone": "06c169f8-63d8-4f44-9dd4-69536eef80cd"
+    },
+    "E04-US02": {
+      "id": "AND-56",
+      "uuid": "502ffecf-d156-4864-acac-7142a068f825",
+      "url": "https://linear.app/anixstudio/issue/AND-56/e04-us02-statusy-zamechanij-i-roli-soglasuyushih",
+      "status": "Backlog",
+      "milestone": "06c169f8-63d8-4f44-9dd4-69536eef80cd"
+    },
+    "E04-US03": {
+      "id": "AND-57",
+      "uuid": "2ce7407a-1d4d-4368-9e4d-6dffe06cc330",
+      "url": "https://linear.app/anixstudio/issue/AND-57/e04-us03-protokol-prinyatiya-ili-vozvrata-na-pravki",
+      "status": "Backlog",
+      "milestone": "06c169f8-63d8-4f44-9dd4-69536eef80cd"
+    },
+    "E05-US01": {
+      "id": "AND-58",
+      "uuid": "ce8cd06b-86cc-4b5d-80a7-2088a8e6bc9d",
+      "url": "https://linear.app/anixstudio/issue/AND-58/e05-us01-neizmenyaemye-versii-i-otvetvleniya",
+      "status": "Backlog",
+      "milestone": "06c169f8-63d8-4f44-9dd4-69536eef80cd"
+    },
+    "E05-US02": {
+      "id": "AND-59",
+      "uuid": "ee44e1ba-bd67-4356-9b16-1ecea95e1ec5",
+      "url": "https://linear.app/anixstudio/issue/AND-59/e05-us02-adresnoe-primenenie-pravok-bez-polnoj-regeneracii",
+      "status": "Backlog",
+      "milestone": "06c169f8-63d8-4f44-9dd4-69536eef80cd"
+    },
+    "E05-US03": {
+      "id": "AND-60",
+      "uuid": "0b4edecd-93da-41fd-a87a-2e2cd77187c0",
+      "url": "https://linear.app/anixstudio/issue/AND-60/e05-us03-sravnenie-i-povtornoe-soglasovanie",
+      "status": "Backlog",
+      "milestone": "06c169f8-63d8-4f44-9dd4-69536eef80cd"
+    },
+    "E06-US01": {
+      "id": "AND-61",
+      "uuid": "59e316ca-35fe-471f-a970-346f92536d77",
+      "url": "https://linear.app/anixstudio/issue/AND-61/e06-us01-forma-rezhissyorskogo-tz-po-prinyatomu-scenariyu",
+      "status": "Backlog",
+      "milestone": "9fc704c5-fb1d-4bf5-905f-c3a314c43f83"
+    },
+    "E06-US02": {
+      "id": "AND-62",
+      "uuid": "e846688d-903a-4cb3-b6fa-19f371b62218",
+      "url": "https://linear.app/anixstudio/issue/AND-62/e06-us02-plany-kak-sushnosti-vnutri-sceny",
+      "status": "Backlog",
+      "milestone": "9fc704c5-fb1d-4bf5-905f-c3a314c43f83"
+    },
+    "E06-US03": {
+      "id": "AND-63",
+      "uuid": "b6325d62-61fb-432d-b4c2-0e52c7e9adef",
+      "url": "https://linear.app/anixstudio/issue/AND-63/e06-us03-resursnye-ogranicheniya-rezhissury",
+      "status": "Backlog",
+      "milestone": "9fc704c5-fb1d-4bf5-905f-c3a314c43f83"
+    },
+    "E07-US01": {
+      "id": "AND-64",
+      "uuid": "586e0a41-d09c-4ec6-9916-99072ac4614e",
+      "url": "https://linear.app/anixstudio/issue/AND-64/e07-us01-strukturirovannaya-eksplikaciya-proekta",
+      "status": "Backlog",
+      "milestone": "9fc704c5-fb1d-4bf5-905f-c3a314c43f83"
+    },
+    "E07-US02": {
+      "id": "AND-65",
+      "uuid": "d0cb3b55-40f7-4066-820b-429ebc85b1c3",
+      "url": "https://linear.app/anixstudio/issue/AND-65/e07-us02-eksplikaciya-scen-i-perehodov-ontotona",
+      "status": "Backlog",
+      "milestone": "9fc704c5-fb1d-4bf5-905f-c3a314c43f83"
+    },
+    "E07-US03": {
+      "id": "AND-66",
+      "uuid": "37814a39-8f2d-4cdb-af36-4701f18528de",
+      "url": "https://linear.app/anixstudio/issue/AND-66/e07-us03-soglasovanie-eksplikacii-i-eksport",
+      "status": "Backlog",
+      "milestone": "9fc704c5-fb1d-4bf5-905f-c3a314c43f83"
+    },
+    "E08-US01": {
+      "id": "AND-67",
+      "uuid": "745dd01f-b0d3-4836-955d-7a8f652be814",
+      "url": "https://linear.app/anixstudio/issue/AND-67/e08-us01-biblioteka-zagruzhennyh-i-vneshnih-referensov",
+      "status": "Backlog",
+      "milestone": "c1f34934-4288-4629-b085-36d62eb4035f"
+    },
+    "E08-US02": {
+      "id": "AND-68",
+      "uuid": "52d70faa-1436-4dfd-8245-2fd5d9d1c494",
+      "url": "https://linear.app/anixstudio/issue/AND-68/e08-us02-referens-svyazan-s-konkretnym-resheniem",
+      "status": "Backlog",
+      "milestone": "c1f34934-4288-4629-b085-36d62eb4035f"
+    },
+    "E08-US03": {
+      "id": "AND-69",
+      "uuid": "35d33c4f-97a8-47da-ab06-6581c772ccea",
+      "url": "https://linear.app/anixstudio/issue/AND-69/e08-us03-vizualnaya-doska-i-soglasovanie-nabora",
+      "status": "Backlog",
+      "milestone": "c1f34934-4288-4629-b085-36d62eb4035f"
+    },
+    "E09-US01": {
+      "id": "AND-70",
+      "uuid": "be885526-5a7e-4bd4-a697-cbdb26548582",
+      "url": "https://linear.app/anixstudio/issue/AND-70/e09-us01-katalog-personazhej-i-povtornoe-ispolzovanie",
+      "status": "Backlog",
+      "milestone": "c1f34934-4288-4629-b085-36d62eb4035f"
+    },
+    "E09-US02": {
+      "id": "AND-71",
+      "uuid": "024612b4-76c9-462c-8103-eba63cd591bd",
+      "url": "https://linear.app/anixstudio/issue/AND-71/e09-us02-pasport-identichnosti-i-nabor-rakursov",
+      "status": "Backlog",
+      "milestone": "c1f34934-4288-4629-b085-36d62eb4035f"
+    },
+    "E09-US03": {
+      "id": "AND-72",
+      "uuid": "30944ced-276a-4a5d-bfde-b7829e41418a",
+      "url": "https://linear.app/anixstudio/issue/AND-72/e09-us03-proverka-postoyanstva-personazha",
+      "status": "Backlog",
+      "milestone": "c1f34934-4288-4629-b085-36d62eb4035f"
+    },
+    "E10-US01": {
+      "id": "AND-73",
+      "uuid": "af5888f0-0bdf-42aa-a150-6ae83ba50893",
+      "url": "https://linear.app/anixstudio/issue/AND-73/e10-us01-zadanie-na-izobrazhenie-iz-plana",
+      "status": "Backlog",
+      "milestone": "041ceb3b-c65b-408d-9b9c-fbaf43623a00"
+    },
+    "E10-US02": {
+      "id": "AND-74",
+      "uuid": "94cc16f6-84a7-479f-82f8-c7cb0daadbf4",
+      "url": "https://linear.app/anixstudio/issue/AND-74/e10-us02-galereya-dublej-i-povtoryaemaya-generaciya",
+      "status": "Backlog",
+      "milestone": "041ceb3b-c65b-408d-9b9c-fbaf43623a00"
+    },
+    "E10-US03": {
+      "id": "AND-75",
+      "uuid": "2659ca43-1e9e-428e-a389-e6e9dd1bfbbb",
+      "url": "https://linear.app/anixstudio/issue/AND-75/e10-us03-vybor-i-proverka-kadra",
+      "status": "Backlog",
+      "milestone": "041ceb3b-c65b-408d-9b9c-fbaf43623a00"
+    },
+    "E11-US01": {
+      "id": "AND-76",
+      "uuid": "157222c3-d24b-4574-b355-0b93965a67d8",
+      "url": "https://linear.app/anixstudio/issue/AND-76/e11-us01-nadyozhnaya-asinhronnaya-generaciya-video",
+      "status": "Backlog",
+      "milestone": "ef2bd44a-d126-46f1-b0be-a3009b0cdb7e"
+    },
+    "E11-US02": {
+      "id": "AND-77",
+      "uuid": "72ccb289-8e16-44a8-ad14-bee42586ee9b",
+      "url": "https://linear.app/anixstudio/issue/AND-77/e11-us02-prosmotr-i-sravnenie-dublej",
+      "status": "Backlog",
+      "milestone": "ef2bd44a-d126-46f1-b0be-a3009b0cdb7e"
+    },
+    "E11-US03": {
+      "id": "AND-78",
+      "uuid": "9433e0a7-3682-4ec4-8030-d1f235c17a75",
+      "url": "https://linear.app/anixstudio/issue/AND-78/e11-us03-vybor-video-bez-unichtozheniya-originala",
+      "status": "Backlog",
+      "milestone": "ef2bd44a-d126-46f1-b0be-a3009b0cdb7e"
+    },
+    "E12-US01": {
+      "id": "AND-79",
+      "uuid": "875e52d5-e05a-4ba5-8488-6a044493b5f3",
+      "url": "https://linear.app/anixstudio/issue/AND-79/e12-us01-kontrakt-cveta-i-ishodnikov",
+      "status": "Backlog",
+      "milestone": "8498739a-3987-48f7-b9d3-2a0b022c1af3"
+    },
+    "E12-US02": {
+      "id": "AND-80",
+      "uuid": "279b53fe-e943-4fb1-9b12-1cc8a72eb962",
+      "url": "https://linear.app/anixstudio/issue/AND-80/e12-us02-nerazrushayushaya-korrekciya-i-look-sceny",
+      "status": "Backlog",
+      "milestone": "8498739a-3987-48f7-b9d3-2a0b022c1af3"
+    },
+    "E12-US03": {
+      "id": "AND-81",
+      "uuid": "1dd3baad-932e-4745-9eea-c408fbaa74c6",
+      "url": "https://linear.app/anixstudio/issue/AND-81/e12-us03-svedenie-cveta-planov-i-proverka-eksporta",
+      "status": "Backlog",
+      "milestone": "8498739a-3987-48f7-b9d3-2a0b022c1af3"
+    },
+    "E13-US01": {
+      "id": "AND-82",
+      "uuid": "97b0d854-ed4d-45ce-b049-9007b85b373c",
+      "url": "https://linear.app/anixstudio/issue/AND-82/e13-us01-tajmlajn-s-videodorozhkami-i-zvukom",
+      "status": "Backlog",
+      "milestone": "0b4ac9c7-85db-4e34-b31a-a5aa5f922da7"
+    },
+    "E13-US02": {
+      "id": "AND-83",
+      "uuid": "4840aeac-5ad7-4c8b-b411-8c07477d481c",
+      "url": "https://linear.app/anixstudio/issue/AND-83/e13-us02-chernovoj-preview-i-vosproizvodimyj-render",
+      "status": "Backlog",
+      "milestone": "0b4ac9c7-85db-4e34-b31a-a5aa5f922da7"
+    },
+    "E13-US03": {
+      "id": "AND-84",
+      "uuid": "9c790758-ae4a-4562-afbe-f7679df70789",
+      "url": "https://linear.app/anixstudio/issue/AND-84/e13-us03-kontrol-mastera-i-komplekt-peredachi",
+      "status": "Backlog",
+      "milestone": "0b4ac9c7-85db-4e34-b31a-a5aa5f922da7"
+    },
+    "E14-US01": {
+      "id": "AND-85",
+      "uuid": "effd42bf-3daa-42e4-933a-677b210c2d10",
+      "url": "https://linear.app/anixstudio/issue/AND-85/e14-us01-obzor-proekta-i-proizvodstvennyj-marshrut",
+      "status": "In Review",
+      "milestone": "efffdcb8-e82c-4728-a1ff-29725586acc7"
+    },
+    "E14-US02": {
+      "id": "AND-86",
+      "uuid": "6c847865-9553-4fcd-ae50-1621b1cb4a1f",
+      "url": "https://linear.app/anixstudio/issue/AND-86/e14-us02-rabochaya-oblast-sceny-i-svyazej",
+      "status": "Backlog",
+      "milestone": "cc58f45e-ebf3-4e7a-9db2-1b8c00b0a604"
+    },
+    "E14-US03": {
+      "id": "AND-87",
+      "uuid": "53b8cb4d-b259-48d1-ab46-d29c7670d139",
+      "url": "https://linear.app/anixstudio/issue/AND-87/e14-us03-ochered-isklyuchenij-dlya-prodyusera",
+      "status": "Backlog",
+      "milestone": "06c169f8-63d8-4f44-9dd4-69536eef80cd"
+    },
+    "E15-US01": {
+      "id": "AND-88",
+      "uuid": "d43feef4-2833-40fa-9961-14e5e10f9bbf",
+      "url": "https://linear.app/anixstudio/issue/AND-88/e15-us01-versii-lokalnyh-kopij-i-zashita-ot-konfliktov",
+      "status": "In Review",
+      "milestone": "efffdcb8-e82c-4728-a1ff-29725586acc7"
+    },
+    "E15-US02": {
+      "id": "AND-89",
+      "uuid": "34bfa78a-7387-40b6-88fa-40d35a356cc4",
+      "url": "https://linear.app/anixstudio/issue/AND-89/e15-us02-postgres-model-i-upravlyaemye-migracii",
+      "status": "Backlog",
+      "milestone": "814448ce-44af-4c7f-8242-3438c4ec58e7"
+    },
+    "E15-US03": {
+      "id": "AND-90",
+      "uuid": "6aed7120-8c76-4857-a59b-a0e3db874d89",
+      "url": "https://linear.app/anixstudio/issue/AND-90/e15-us03-avtorizaciya-i-izolyaciya-komandnogo-api",
+      "status": "Backlog",
+      "milestone": "cc58f45e-ebf3-4e7a-9db2-1b8c00b0a604"
+    },
+    "E15-US04": {
+      "id": "AND-91",
+      "uuid": "1eab63e1-4f74-40d2-b6d9-8c21b43bbc84",
+      "url": "https://linear.app/anixstudio/issue/AND-91/e15-us04-ochered-zadach-nablyudaemost-i-vosstanovlenie",
+      "status": "Backlog",
+      "milestone": "041ceb3b-c65b-408d-9b9c-fbaf43623a00"
+    },
+    "E16-US01": {
+      "id": "AND-92",
+      "uuid": "a28524ae-1ab6-4ad4-b926-9b4ba2ac6e64",
+      "url": "https://linear.app/anixstudio/issue/AND-92/e16-us01-versionnyj-reestr-ponyatij-i-osej",
+      "status": "Backlog",
+      "milestone": "814448ce-44af-4c7f-8242-3438c4ec58e7"
+    },
+    "E16-US02": {
+      "id": "AND-93",
+      "uuid": "0c9d328a-e6ff-4afd-a7fa-980682f7393a",
+      "url": "https://linear.app/anixstudio/issue/AND-93/e16-us02-zavisimosti-i-proverki-klassifikacij",
+      "status": "Backlog",
+      "milestone": "814448ce-44af-4c7f-8242-3438c4ec58e7"
+    },
+    "E16-US03": {
+      "id": "AND-94",
+      "uuid": "04655584-e11a-4932-bb98-10cf1e127e58",
+      "url": "https://linear.app/anixstudio/issue/AND-94/e16-us03-korpus-brifov-i-redaktorskaya-ocenka",
+      "status": "Backlog",
+      "milestone": "cc58f45e-ebf3-4e7a-9db2-1b8c00b0a604"
+    }
+  }
+}

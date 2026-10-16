@@ -132,4 +132,12 @@ def list_projects():
 def save_project(project_id: str, request: ProjectSave):
     if project_id != request.id:
         raise HTTPException(422, "ID проекта не совпадает.")
-    return {"id": request.id, "updated": storage.save(request.id, request.data)}
+    try:
+        return {"id": request.id, **storage.save(request.id, request.data, request.expected_revision)}
+    except storage.ConflictError as exc:
+        raise HTTPException(409, str(exc)) from exc
+
+
+@app.get("/api/flow/projects/{project_id}/revisions")
+def project_revisions(project_id: str):
+    return {"revisions": storage.revisions(project_id)}

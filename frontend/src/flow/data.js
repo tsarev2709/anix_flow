@@ -1,6 +1,7 @@
 import { projectSchema } from './schema';
 
 export const STAGES = [
+  { id: 'overview', n: '00', name: 'Обзор проекта', caption: 'Маршрут и следующий шаг', icon: 'LayoutDashboard' },
   { id: 'inputs', n: '01', name: 'Задача и материалы', caption: 'Бриф, документы, контекст', icon: 'Files' },
   { id: 'meaning', n: '02', name: 'Смысловая задача', caption: 'Аудитория и изменение', icon: 'Compass' },
   { id: 'dramaturgy', n: '03', name: 'Драматургическая система', caption: 'Онтотон, голос, акценты', icon: 'Orbit' },
@@ -64,7 +65,7 @@ export function newProject(demo = false) {
       interpretation: 'Просить помощи — естественная часть работы.', undesired: 'Новичок беспомощен и ни на что не способен.' }] : [],
     effects: demo ? ['emotion', 'intention', 'action'] : [],
     design: { order: 'auto', information: 'auto', ending: 'auto', perspective: '', com_b: [] },
-    brief: null, result: null, selected: '', approved_checks: {}, revisions: [], updated: new Date().toISOString(),
+    api_revisions: {}, brief: null, result: null, selected: '', approved_checks: {}, revisions: [], updated: new Date().toISOString(),
   };
 }
 

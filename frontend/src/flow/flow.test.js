@@ -3,7 +3,8 @@ import { createRoot } from 'react-dom/client';
 import { Simulate } from 'react-dom/test-utils';
 import FlowApp from './FlowApp';
 import { Variants } from './Results';
-import { newProject, inputKey, inputOf, restoreProject, countWords, validateProject } from './data';
+import { projectProgress } from './Overview';
+import { STAGES, newProject, inputKey, inputOf, restoreProject, countWords, validateProject } from './data';
 import { markdown } from './api';
 
 global.IS_REACT_ACT_ENVIRONMENT = true;
@@ -47,7 +48,7 @@ describe('workbench workflow', () => {
     expect(node).toBeTruthy(); act(() => Simulate.click(node)); return node;
   };
   const navigate = (container, id) => {
-    const order = ['inputs', 'meaning', 'dramaturgy', 'constraints', 'spec', 'variants', 'review'];
+    const order = STAGES.map(s => s.id);
     act(() => Simulate.click(container.querySelectorAll('.stage-nav')[order.indexOf(id)]));
   };
 
@@ -66,6 +67,46 @@ describe('workbench workflow', () => {
     act(() => root.unmount()); root = createRoot(container);
     await act(async () => root.render(<FlowApp />));
     expect(container.textContent).toContain('Новая адаптация');
+  });
+
+  test('overview shows the production route and navigates to the actual next step', async () => {
+    await act(async () => root.render(<FlowApp />));
+    expect(container.textContent).toContain('Маршрут производства');
+    expect(container.textContent).toContain('Монтаж и мастер');
+    expect(container.textContent).toContain('Запланировано');
+    expect(container.querySelectorAll('.production-row')).toHaveLength(13);
+    click(container, 'Продолжить');
+    expect(container.querySelector('.stage-nav[aria-current="step"]').textContent).toContain('ТЗ на драматургию');
+    const p = newProject(true);
+    p.selected = 'missing-variant';
+    expect(projectProgress(p).selectionValid).toBe(false);
+  });
+
+  test('backup carries expected revision and a conflict keeps the working project', async () => {
+    let calls = 0;
+    global.fetch = jest.fn(async (url, options) => {
+      if (options.method === 'PUT') {
+        calls += 1;
+        const body = JSON.parse(options.body);
+        if (calls === 1) { expect(body.expected_revision).toBeNull(); return { ok: true, json: async () => ({ revision: 1, updated: 'now' }) }; }
+        expect(body.expected_revision).toBe(1);
+        return { ok: false, status: 409, json: async () => ({ detail: 'Конфликт ревизий. Правки не перезаписаны.' }) };
+      }
+      return { ok: true, json: async () => ({}) };
+    });
+    await act(async () => root.render(<FlowApp />));
+    click(container, 'Экспорт');
+    await act(async () => { click(container, 'Сохранить копию в локальный API'); });
+    expect(container.textContent).toContain('ревизия 1');
+    await act(async () => { click(container, 'Сохранить копию в локальный API'); });
+    expect(container.textContent).toContain('Конфликт ревизий');
+    expect(container.textContent).toContain('Первый день. Первый шаг.');
+    click(container, 'Создать отдельную копию с текущими правками');
+    await act(async () => new Promise(resolve => setTimeout(resolve, 500)));
+    const saved = JSON.parse(localStorage.getItem('anix_flow_workbench_v2'));
+    expect(saved.projects).toHaveLength(2);
+    expect(saved.projects[0].api_revisions).toEqual({});
+    expect(saved.projects[0].id).not.toBe(saved.projects[1].id);
   });
 
   test('comparison opens another variant and missing report prevents selection', async () => {
